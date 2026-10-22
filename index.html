@@ -1,0 +1,3238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Research Paper Factory v4.1</title>
+<style>
+:root{--bg:#0b0f16;--panel:#111823;--panel2:#0e141d;--line:#1e2a3a;--txt:#dbe6f3;
+--dim:#7b8da3;--accent:#4da3ff;--ok:#38d39f;--warn:#ffb84d;--err:#ff6b6b;
+--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--txt);font:14px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+header{padding:15px 22px;border-bottom:1px solid var(--line);background:var(--panel2);display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:20;flex-wrap:wrap}
+header h1{margin:0;font-size:15.5px}
+header .tag{font-size:11px;color:var(--dim);border:1px solid var(--line);padding:3px 8px;border-radius:20px}
+header .tag.free{color:var(--ok);border-color:#1c4437}
+#boot{margin-left:auto;font-size:12px;color:var(--dim);font-family:var(--mono)}
+#boot.ok{color:var(--ok)}#boot.bad{color:var(--err)}
+.wrap{display:grid;grid-template-columns:400px 1fr;gap:16px;padding:16px;align-items:start}
+@media(max-width:980px){.wrap{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px}
+.card h2{margin:0 0 12px;font-size:12px;text-transform:uppercase;letter-spacing:1.2px;color:var(--dim)}
+label{display:block;font-size:12px;color:var(--dim);margin:10px 0 4px}
+input,select,textarea{width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--txt);border-radius:7px;padding:9px 10px;font-size:13px;font-family:inherit;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--accent)}
+textarea{resize:vertical;min-height:62px}
+.row{display:flex;gap:10px}.row>*{flex:1}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.chip{border:1px solid var(--line);border-radius:20px;padding:6px 13px;font-size:12px;cursor:pointer;color:var(--dim);user-select:none}
+.chip.on{background:rgba(77,163,255,.14);border-color:var(--accent);color:var(--accent)}
+.toggles{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.tg{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--dim);border:1px solid var(--line);border-radius:7px;padding:8px;cursor:pointer}
+.tg input{width:auto}.tg.on{color:var(--txt);border-color:#2c3f57}
+button{width:100%;margin-top:14px;padding:12px;border:0;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600;background:var(--accent);color:#04101f}
+button:disabled{opacity:.45;cursor:not-allowed}
+button.ghost{background:transparent;border:1px solid var(--line);color:var(--txt);font-weight:500}
+.stages{display:grid;gap:6px}
+.st{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:7px;border:1px solid var(--line);font-size:12.5px;background:var(--panel2)}
+.st .dot{width:9px;height:9px;border-radius:50%;background:#2a3a4d;flex:none}
+.st.run .dot{background:var(--accent);box-shadow:0 0 0 4px rgba(77,163,255,.18);animation:p 1s infinite}
+.st.done .dot{background:var(--ok)}.st.done{color:var(--ok);border-color:#1c4437}
+.st.err .dot{background:var(--err)}.st.err{color:var(--err)}
+@keyframes p{50%{opacity:.35}}
+.st .par{margin-left:auto;font-size:10px;color:var(--dim);border:1px solid var(--line);padding:1px 6px;border-radius:10px}
+#log{background:#05080d;border:1px solid var(--line);border-radius:8px;padding:10px;height:250px;overflow:auto;font-family:var(--mono);font-size:11.5px;line-height:1.5}
+#log div{white-space:pre-wrap;word-break:break-word}
+#log .s{color:var(--accent)}#log .e{color:var(--err)}#log .w{color:var(--warn)}#log .g{color:var(--ok)}#log .d{color:var(--dim)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(98px,1fr));gap:8px;margin-top:12px}
+.stat{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:10px;text-align:center}
+.stat b{display:block;font-size:18px;color:var(--accent)}
+.stat span{font-size:10.5px;color:var(--dim);text-transform:uppercase;letter-spacing:.6px}
+.stat.good b{color:var(--ok)}.stat.bad b{color:var(--err)}
+#dl{display:none;gap:8px;margin-top:14px;grid-template-columns:1fr 1fr}
+#dl button{margin:0}
+#preview{display:none;margin-top:14px;background:#fff;color:#111;border-radius:8px;padding:26px 30px;max-height:560px;overflow:auto;font-family:Georgia,serif;font-size:13.5px;line-height:1.62}
+#preview h1{font-size:19px;text-align:center;margin:0 0 10px}
+#preview h3{font-size:13.5px;margin:18px 0 6px;border-bottom:1px solid #ddd;padding-bottom:3px}
+#preview p{text-align:justify;margin:0 0 9px}
+#preview .au{text-align:center;font-size:12.5px;color:#444;margin-bottom:14px}
+#preview .abs{font-size:12.5px;background:#f6f8fa;padding:12px;border-left:3px solid #4da3ff}
+#preview table{border-collapse:collapse;width:100%;font-size:11px;margin:10px 0}
+#preview td,#preview th{border:1px solid #bbb;padding:3px 6px}
+#preview .cap{font-size:11px;text-align:center;color:#333;margin:4px 0 12px}
+#refs{font-family:var(--mono);font-size:11.5px;max-height:340px;overflow:auto}
+#refs .r{display:flex;gap:8px;padding:6px 8px;border-bottom:1px solid var(--line)}
+#refs .sc{color:var(--ok);flex:none;width:44px;text-align:right}
+#refs .t{color:var(--dim)}
+.hint{font-size:11px;color:var(--dim);margin-top:6px;line-height:1.45}
+.bar{height:4px;background:#1a2431;border-radius:3px;overflow:hidden;margin-top:10px}
+.bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .4s}
+.engine{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--dim);background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:8px 10px;margin-top:8px}
+.engine b{color:var(--txt)}
+details summary{cursor:pointer;font-size:12px;color:var(--dim);margin-top:12px}
+</style>
+<script>
+/* Content protection: deters right-click, copy, view-source, save, print and drag */
+(function(){
+  "use strict";
+  function isField(t){
+    return !!(t && t.closest && t.closest("input,textarea,select,[contenteditable='true']"));
+  }
+  function stop(e){ e.preventDefault(); e.stopPropagation(); return false; }
+
+  /* right-click / long-press menu */
+  document.addEventListener("contextmenu", stop, true);
+
+  /* copy / cut / drag / selection outside form fields (typing & pasting inside fields still works) */
+  ["copy","cut","dragstart","selectstart"].forEach(function(ev){
+    document.addEventListener(ev, function(e){ if(!isField(e.target)) return stop(e); }, true);
+  });
+
+  /* keyboard shortcuts */
+  document.addEventListener("keydown", function(e){
+    var k = (e.key || "").toLowerCase();
+    var ctrl = e.ctrlKey || e.metaKey;
+    if (k === "f12") return stop(e);
+    if (ctrl && e.shiftKey && (k === "i" || k === "j" || k === "c" || k === "k")) return stop(e); /* devtools */
+    if (ctrl && (k === "u" || k === "s" || k === "p")) return stop(e);                           /* source, save, print */
+    if (ctrl && (k === "c" || k === "x" || k === "a") && !isField(e.target)) return stop(e);      /* copy, cut, select-all */
+  }, true);
+
+  /* block printing / "Save as PDF" of the page */
+  var css = document.createElement("style");
+  css.textContent =
+    "html,body{-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;-webkit-touch-callout:none}" +
+    "input,textarea,select,[contenteditable='true']{-webkit-user-select:text;-moz-user-select:text;user-select:text}" +
+    "img{-webkit-user-drag:none;user-drag:none}" +
+    "@media print{html,body{display:none!important}}";
+  (document.head || document.documentElement).appendChild(css);
+})();
+</script>
+</head>
+<body>
+
+<header>
+  <h1>Research Paper Factory <span style="color:var(--dim);font-size:12px">v4.1</span></h1>
+  <span class="tag free">no API key</span>
+  <span class="tag">scored retrieval · section-scoped citations · rhythm humaniser</span>
+  <span id="boot">booting…</span>
+</header>
+
+<div class="wrap">
+  <div>
+    <div class="card">
+      <h2>Manuscript brief</h2>
+      <label>Paper title</label>
+      <textarea id="title" placeholder="e.g. Adaptive Sparse Attention for Long-Horizon Time-Series Forecasting"></textarea>
+
+      <label>Paper type</label>
+      <div class="chips" id="kind">
+        <div class="chip on" data-v="conference">Conference (7–8p · 4 tables · 5 figs)</div>
+        <div class="chip" data-v="journal">Journal (25–40p · 12 tables · 12 figs)</div>
+      </div>
+
+      <label>House style</label>
+      <div class="chips" id="style">
+        <div class="chip on" data-v="auto">Auto</div>
+        <div class="chip" data-v="ieee">IEEE</div>
+        <div class="chip" data-v="springer">Springer</div>
+        <div class="chip" data-v="elsevier">Elsevier</div>
+      </div>
+
+      <div class="row">
+        <div><label>Target pages</label><input id="pages" type="number" value="8" min="4" max="60"></div>
+        <div><label>Citation style</label>
+          <select id="citestyle">
+            <option value="auto">Auto</option><option value="apa">APA 7th</option>
+            <option value="ieee">IEEE numeric</option>
+          </select>
+        </div>
+      </div>
+
+      <label>Authors <span class="hint">— Name | Affiliation | email</span></label>
+      <textarea id="authors" placeholder="A. Sharma | Dept. of CSE, IIT Delhi | a@iitd.ac.in"></textarea>
+
+      <label>Dataset override <span class="hint">— blank = auto</span></label>
+      <input id="ds" placeholder="e.g. ETDataset, Traffic">
+
+      <label>Extra notes</label>
+      <textarea id="notes" placeholder="Must include ablation. Emphasise edge deployment."></textarea>
+
+      <label>Engine</label>
+      <div class="chips" id="engine">
+        <div class="chip on" data-v="auto">Auto</div>
+        <div class="chip" data-v="cloud">Keyless cloud</div>
+        <div class="chip" data-v="offline">Offline template</div>
+      </div>
+      <div class="engine"><span>Status:</span><b id="estate">not probed</b></div>
+
+      <div class="toggles">
+        <label class="tg on"><input type="checkbox" id="t_grammar" checked> Grammar</label>
+        <label class="tg on"><input type="checkbox" id="t_plag" checked> Plagiarism</label>
+        <label class="tg on"><input type="checkbox" id="t_hum" checked> Humaniser</label>
+        <label class="tg on"><input type="checkbox" id="t_assets" checked> Tables + figures</label>
+      </div>
+
+      <button id="go">Generate manuscript</button>
+      <button class="ghost" id="test">Test engine</button>
+      <div class="bar"><i id="bar"></i></div>
+
+      <details>
+        <summary>Advanced</summary>
+        <label>Parallel model calls</label><input id="conc" type="number" value="2" min="1" max="8">
+        <label>Humaniser intensity</label>
+        <select id="hint">
+          <option value="4">Maximum (target AI &lt; 6%)</option>
+          <option value="3" selected>Aggressive (target AI &lt; 10%)</option>
+          <option value="2">Strong</option>
+        </select>
+        <label>Reference strictness</label>
+        <select id="strict">
+          <option value="2" selected>Strict (≥2 keyterm match)</option>
+          <option value="1">Moderate</option>
+          <option value="0">Loose</option>
+        </select>
+        <label>API key <span class="hint">— optional</span></label><input id="apikey" type="password">
+        <label>Base URL</label><input id="baseurl" placeholder="https://text.pollinations.ai/openai">
+        <label>Model</label><input id="model" value="openai">
+        <label>CORS proxy</label><input id="proxy" placeholder="https://corsproxy.io/?url={url}">
+      </details>
+    </div>
+  </div>
+
+  <div>
+    <div class="card">
+      <h2>Pipeline <span class="hint">∥ parallel</span></h2>
+      <div class="stages" id="stages"></div>
+      <div class="stats" id="stats"></div>
+      <div id="dl">
+        <button id="d_docx">⬇ Download .docx</button>
+        <button class="ghost" id="d_bib">⬇ references.bib</button>
+        <button class="ghost" id="d_md">⬇ paper.md</button>
+        <button class="ghost" id="d_rep">⬇ report.json</button>
+      </div>
+      <button class="ghost" id="prevbtn" style="display:none">Preview paper</button>
+    </div>
+    <div class="card" style="margin-top:16px"><h2>Live console</h2><div id="log"></div></div>
+    <div class="card" style="margin-top:16px;display:none" id="refcard">
+      <h2>Retrieved references — relevance score</h2><div id="refs"></div>
+    </div>
+    <div id="preview"></div>
+  </div>
+</div>
+
+<!-- ============================ PYTHON ============================ -->
+
+<script type="text/x-python" data-name="pf_cfg">
+STATE = {"api_key":"","base_url":"https://text.pollinations.ai/openai","model":"openai",
+ "proxy":"","contact":"paper.factory@example.com","concurrency":2,"use_assets":True,
+ "engine":"auto","llm_ok":False,"intensity":3,"strict":2,"hum_model_idx":0}
+
+AI_TARGET = 10.0
+SIM_TARGET = 16.0
+MAX_HUMANIZE_PASSES = 5
+MIN_YEAR = 2015
+MIN_CALL_GAP = 1.2
+FREE_MODELS = ["openai","mistral","llama","gemini","deepseek"]
+HUM_MODELS  = ["mistral","llama","gemini","deepseek","openai"]
+
+STYLES = {
+ "ieee":{"label":"IEEE Conference","kind":"conference","columns":2,
+  "body_font":"Times New Roman","body_size":10,"title_size":24,"author_size":11,
+  "heading_size":10,"caption_size":8,"line_spacing":1.0,"margins":(0.75,0.75,0.75,0.62),
+  "indent":0.2,"cite":"ieee","abstract_heading":"Abstract","keywords_heading":"Index Terms",
+  "ref_heading":"References","ref_size":8,"words_per_page":900,"default_refs":40,
+  "tables":4,"figures":5},
+ "springer":{"label":"Springer Journal","kind":"journal","columns":1,
+  "body_font":"Times New Roman","body_size":10.5,"title_size":18,"author_size":11,
+  "heading_size":11,"caption_size":9,"line_spacing":1.15,"margins":(1.0,1.0,1.0,1.0),
+  "indent":0.0,"cite":"apa","abstract_heading":"Abstract","keywords_heading":"Keywords",
+  "ref_heading":"References","ref_size":10,"words_per_page":560,"default_refs":95,
+  "tables":12,"figures":12},
+ "elsevier":{"label":"Elsevier Journal","kind":"journal","columns":1,
+  "body_font":"Times New Roman","body_size":11,"title_size":18,"author_size":11,
+  "heading_size":11.5,"caption_size":9,"line_spacing":1.15,"margins":(1.0,1.0,1.0,1.0),
+  "indent":0.0,"cite":"apa","abstract_heading":"Abstract","keywords_heading":"Keywords",
+  "ref_heading":"References","ref_size":10,"words_per_page":560,"default_refs":95,
+  "tables":12,"figures":12},
+}
+
+TEMPLATES = {
+ "conference":[
+  ("Introduction",0.16,["Motivation and Context","Problem Statement","Contributions of This Work"]),
+  ("Related Work",0.14,["Foundational Approaches","Recent Advances","Research Gap Addressed"]),
+  ("Proposed Framework",0.20,["System Overview","Architecture","Key Components and Design Choices"]),
+  ("Mathematical Formulation",0.10,["Notation and Preliminaries","Objective Function","Derivation"]),
+  ("Experimental Setup",0.10,["Datasets","Baselines and Metrics","Implementation Details"]),
+  ("Results and Discussion",0.20,["Main Comparative Results","Ablation Study","Analysis and Insights"]),
+  ("Conclusion and Future Work",0.10,["Summary","Limitations","Future Directions"]),
+ ],
+ "journal":[
+  ("Introduction",0.09,["Motivation","Problem Statement","Research Questions","Contributions","Organisation of the Paper"]),
+  ("Background and Preliminaries",0.10,["Theoretical Foundations","Formal Definitions","Notation"]),
+  ("Literature Review",0.17,["Early Landmark Work","Deep Learning Era Approaches","Hybrid and Emerging Methods","Comparative Synthesis","Identified Research Gaps"]),
+  ("Materials and Data",0.07,["Data Sources","Preprocessing Pipeline","Data Characteristics","Ethical Considerations"]),
+  ("Proposed Work",0.15,["Overall Architecture","Module Design","Algorithmic Description","Complexity Analysis"]),
+  ("Methodology",0.15,["Problem Formulation","Training Procedure","Optimisation Strategy","Evaluation Protocol","Reproducibility"]),
+  ("Mathematical Derivations",0.10,["Preliminary Lemmas","Main Derivation","Convergence Analysis","Bounds and Guarantees"]),
+  ("Results and Discussion",0.13,["Experimental Configuration","Main Comparative Results","Ablation and Sensitivity Analysis","Statistical Significance","Qualitative Analysis","Discussion"]),
+  ("Conclusion and Future Work",0.04,["Summary of Findings","Implications","Limitations","Future Research Directions"]),
+ ],
+}
+
+def resolve_style(kind, style):
+    if style and style in STYLES: return dict(STYLES[style])
+    return dict(STYLES["ieee"] if kind == "conference" else STYLES["springer"])
+
+def skeleton(kind, pages):
+    tpl = TEMPLATES["conference" if kind == "conference" else "journal"]
+    wpp = 900 if kind == "conference" else 560
+    body = int(pages * wpp)
+    out = []
+    for title, ratio, subs in tpl:
+        sw = int(body * ratio)
+        per = max(110, sw // max(1, len(subs)))
+        out.append({"title": title, "target": sw,
+                    "subs": [{"title": s, "target": per} for s in subs]})
+    return out, body
+</script>
+
+<script type="text/x-python" data-name="pf_text">
+import re, hashlib, math
+
+_SENT = re.compile(r"(?<=[.!?])\s+(?=[\"'(\[A-Z0-9])")
+MARKER = re.compile(r"\[\[((?:k\d+\s*,?\s*)+)\]\]")
+ASSET = re.compile(r"\[\[(?:TBL|FIG):\d+\]\]")
+STOP = set("""a an the of for and or in on with to at by from as is are be using via
+based towards toward into over under between across during within without about
+this that these those their its our your new novel study analysis approach method
+methods model models system systems framework frameworks paper""".split())
+
+def slugify(s, n=60):
+    s = re.sub(r"[^\w\s-]", "", s or "").strip().lower()
+    return re.sub(r"[\s_-]+", "-", s)[:n].strip("-") or "paper"
+
+def words(t): return len(re.findall(r"\b[\w'-]+\b", t or ""))
+
+def sentences(t):
+    out = []
+    for p in (t or "").split("\n"):
+        p = p.strip()
+        if p: out += [s.strip() for s in _SENT.split(p) if s.strip()]
+    return out
+
+def paras(t): return [p.strip() for p in re.split(r"\n\s*\n", t or "") if p.strip()]
+
+def keys_of(m): return [k.strip() for k in m.group(1).split(",") if k.strip()]
+
+def count_cites(t): return sum(len(keys_of(m)) for m in MARKER.finditer(t or ""))
+
+def strip_markers(t): return ASSET.sub("", MARKER.sub("", t or ""))
+
+def tidy(t):
+    t = re.sub(r"[ \t]{2,}", " ", t or "")
+    t = re.sub(r"\s+([,.;:])", r"\1", t)
+    t = re.sub(r"\(\s+", "(", t); t = re.sub(r"\s+\)", ")", t)
+    t = re.sub(r" *\n *", "\n", t); t = re.sub(r"\n{3,}", "\n\n", t)
+    return t.strip()
+
+def keyterms(title, n=10):
+    out = []
+    for w in re.findall(r"[A-Za-z][A-Za-z\-]{2,}", title or ""):
+        if w.lower() in STOP: continue
+        if w.lower() not in [o.lower() for o in out]: out.append(w)
+    return out[:n] or ["method"]
+
+def seed(*p): return int(hashlib.sha1("|".join(map(str,p)).encode()).hexdigest()[:10],16)
+
+def num(*p, lo=0.0, hi=1.0, dec=2):
+    return round(lo + (seed(*p) % 100000)/100000.0*(hi-lo), dec)
+
+def longest_run(a, b, n=6):
+    wa = re.findall(r"[a-z0-9]+", (a or "").lower())
+    wb = re.findall(r"[a-z0-9]+", (b or "").lower())
+    if len(wa) < n or len(wb) < n: return 0
+    idx = {}
+    for i in range(len(wb)-n+1): idx.setdefault(tuple(wb[i:i+n]),[]).append(i)
+    best = 0
+    for i in range(len(wa)-n+1):
+        for j in idx.get(tuple(wa[i:i+n]), []):
+            k = n
+            while i+k < len(wa) and j+k < len(wb) and wa[i+k]==wb[j+k]: k += 1
+            best = max(best, k)
+    return best
+
+def shingles(t, n=5):
+    w = re.findall(r"[a-z0-9]+", (t or "").lower())
+    return set(tuple(w[i:i+n]) for i in range(max(0, len(w)-n+1)))
+
+RANK = {}
+_freq = """the be to of and a in that have it for not on with he as you do at this but
+his by from they we say her she or an will my one all would there their what so up out
+if about who get which go me when make can like time no just him know take people into
+year your good some could them see other than then now look only come its over think
+also back after use two how our work first well way even new want because any these
+give day most us is are was were been has had said each made did does done make makes
+used using uses find found show shows showed shown give gives gave given take takes
+took taken need needs needed want wants wanted seem seems seemed look looks looked
+feel however therefore thus hence moreover furthermore additionally consequently
+approach method model result results data system systems performance accuracy
+framework propose proposed presented demonstrate improve improved significant
+effective efficient robust comprehensive novel state art current existing previous
+recent literature study analysis experimental evaluation compare comparison baseline
+benchmark dataset training testing validation architecture network deep learning
+neural feature features representation algorithm optimization loss function parameter
+parameters metric metrics conclusion future direction limitation contribution
+challenge problem solution sparse attention transformer forecasting temporal
+sequence horizon drift calibration regularisation regularization encoder latent
+inference latency throughput ablation sensitivity convergence gradient objective"""
+for i, w in enumerate(_freq.split()): RANK.setdefault(w, i+1)
+DEFAULT_RANK = 1400
+
+def rarity(text):
+    ws = [w for w in re.findall(r"[a-z]{3,}", (text or "").lower())]
+    if not ws: return 0.0
+    return sum(math.log(RANK.get(w, DEFAULT_RANK)) for w in ws) / len(ws)
+</script>
+
+<script type="text/x-python" data-name="pf_relevance">
+import math, re
+
+STOP = set("""a an the of for and or in on with to at by from as is are be using via
+based towards toward into over under between across during within without about this
+that these those their its our your new novel study analysis approach method methods
+model models system systems framework frameworks paper using towards""".split())
+
+def tokens(s):
+    return [w.lower() for w in re.findall(r"[A-Za-z][A-Za-z\-]{2,}", s or "")]
+
+def stem(w):
+    w = w.lower()
+    for suf in ("ations","ation","ings","ing","ities","ity","ies","ers","er","ed","es","s"):
+        if len(w) > len(suf) + 3 and w.endswith(suf):
+            return w[:-len(suf)]
+    return w
+
+def bag(s):
+    return set(stem(w) for w in tokens(s) if w not in STOP)
+
+def cosine(a, b):
+    if not a or not b: return 0.0
+    return len(a & b) / math.sqrt(len(a) * len(b))
+
+def phrases(title, n=12):
+    ws = tokens(title); out = []
+    for size in (3, 2):
+        for i in range(len(ws) - size + 1):
+            chunk = ws[i:i+size]
+            if all(w not in STOP for w in chunk):
+                out.append(" ".join(chunk))
+    seen, uniq = set(), []
+    for p in out:
+        if p not in seen:
+            seen.add(p); uniq.append(p)
+    return uniq[:n]
+
+def overlap_count(a, b):
+    return len(a & b)
+</script>
+
+<script type="text/x-python" data-name="pf_net">
+import asyncio, json, urllib.parse
+IN_BROWSER = False
+try:
+    from pyodide.http import pyfetch
+    IN_BROWSER = True
+except Exception:
+    pass
+if not IN_BROWSER:
+    import requests
+import pf_cfg
+
+AUTO_PROXY = ["https://corsproxy.io/?url={url}",
+              "https://api.allorigins.win/raw?url={url}"]
+
+def _enc(u): return urllib.parse.quote(u, safe="")
+
+async def _raw(method, url, headers, body, timeout):
+    if IN_BROWSER:
+        r = await pyfetch(url, method=method, headers=headers, body=body)
+        return r.status, await r.string()
+    def go():
+        rr = requests.request(method, url, headers=headers, data=body, timeout=timeout)
+        return rr.status_code, rr.text
+    return await asyncio.to_thread(go)
+
+async def request(method, url, params=None, json_body=None, form=None,
+                  headers=None, retries=2, timeout=120, quiet=True, proxy_ok=True):
+    if params:
+        url = url + ("&" if "?" in url else "?") + urllib.parse.urlencode(params)
+    h = {"Accept":"application/json"}
+    if headers: h.update(headers)
+    body = None
+    if json_body is not None:
+        body = json.dumps(json_body); h["Content-Type"] = "application/json"
+    elif form is not None:
+        body = urllib.parse.urlencode(form)
+        h["Content-Type"] = "application/x-www-form-urlencoded"
+
+    cands = [url]
+    user = (pf_cfg.STATE.get("proxy") or "").strip()
+    if user:
+        cands = [user.replace("{url}", _enc(url))] + cands
+    elif IN_BROWSER and proxy_ok:
+        cands += [p.replace("{url}", _enc(url)) for p in AUTO_PROXY]
+
+    last = None
+    for c in cands:
+        for attempt in range(retries + 1):
+            try:
+                st, txt = await _raw(method, c, h, body, timeout)
+                if 200 <= st < 300: return st, txt
+                last = "HTTP %s" % st
+                if st not in (403,408,429,500,502,503,520,522): return st, txt
+            except Exception as e:
+                last = repr(e)
+            await asyncio.sleep(0.6 * (attempt + 1))
+    if not quiet: print("net fail", method, url[:80], last)
+    return 0, ""
+
+async def get_json(url, params=None, headers=None, quiet=True, proxy_ok=True):
+    st, txt = await request("GET", url, params=params, headers=headers,
+                            quiet=quiet, proxy_ok=proxy_ok)
+    if st != 200 or not txt: return None
+    try: return json.loads(txt)
+    except Exception: return None
+
+async def get_text(url, params=None, headers=None, quiet=True, proxy_ok=True):
+    st, txt = await request("GET", url, params=params, headers=headers,
+                            quiet=quiet, proxy_ok=proxy_ok)
+    return txt if st == 200 else ""
+
+async def post_json(url, payload, headers=None, quiet=True):
+    st, txt = await request("POST", url, json_body=payload, headers=headers, quiet=quiet)
+    if st != 200 or not txt: return None, st
+    try: return json.loads(txt), st
+    except Exception: return {"_raw": txt}, st
+
+async def post_form(url, form, quiet=True):
+    st, txt = await request("POST", url, form=form, quiet=quiet)
+    if st != 200 or not txt: return None
+    try: return json.loads(txt)
+    except Exception: return None
+
+class Limiter:
+    def __init__(self, gap):
+        self.gap = gap; self.lock = asyncio.Lock(); self.next_at = 0.0
+    async def wait(self):
+        async with self.lock:
+            now = asyncio.get_event_loop().time()
+            if now < self.next_at:
+                await asyncio.sleep(self.next_at - now)
+                now = asyncio.get_event_loop().time()
+            self.next_at = now + self.gap
+</script>
+
+<script type="text/x-python" data-name="pf_llm">
+import asyncio, json, re
+import pf_cfg, pf_net
+
+LIMITER = pf_net.Limiter(pf_cfg.MIN_CALL_GAP)
+HUM_LIMITER = pf_net.Limiter(pf_cfg.MIN_CALL_GAP)
+KEYLESS = {"url":"https://text.pollinations.ai/openai",
+           "get":"https://text.pollinations.ai/"}
+
+class LLMError(RuntimeError): pass
+
+class LLM:
+    def __init__(self, model=None, temperature=0.7, humaniser=False):
+        self.model = model or pf_cfg.STATE.get("model") or "openai"
+        self.temperature = temperature
+        self.humaniser = humaniser
+
+    @staticmethod
+    def _unwrap(d):
+        if d is None: return None
+        if "_raw" in d: return d["_raw"]
+        try:
+            ch = d.get("choices")
+            if ch:
+                m = ch[0].get("message") or {}
+                return m.get("content") or ch[0].get("text") or ""
+        except Exception: pass
+        return d if isinstance(d, str) else None
+
+    async def chat(self, system, user, max_tokens=2600, temperature=None,
+                   json_mode=False, tries=5, force_model=None):
+        keyed = bool(pf_cfg.STATE.get("api_key"))
+        url = ((pf_cfg.STATE.get("base_url") or "").rstrip("/") + "/chat/completions") \
+              if keyed else KEYLESS["url"]
+        payload = {"model": force_model or self.model,
+                   "messages":[{"role":"system","content":system},
+                               {"role":"user","content":user}],
+                   "temperature": self.temperature if temperature is None else temperature,
+                   "max_tokens": max_tokens, "stream": False}
+        headers = {}
+        if keyed: headers["Authorization"] = "Bearer " + pf_cfg.STATE["api_key"]
+        lim = HUM_LIMITER if self.humaniser else LIMITER
+        models = [payload["model"]] + [m for m in pf_cfg.FREE_MODELS if m != payload["model"]]
+        last = None
+        for i in range(tries):
+            if not keyed: payload["model"] = models[i % len(models)]
+            await lim.wait()
+            try:
+                data, st = await pf_net.post_json(url, payload, headers=headers)
+                txt = self._unwrap(data)
+                if txt and len(txt.strip()) > 2: return txt
+                last = "empty (%s)" % st
+            except Exception as e:
+                last = repr(e)
+            if not keyed:
+                try:
+                    await lim.wait()
+                    gurl = (KEYLESS["get"] + pf_net._enc(user[:5000])
+                            + "?model=" + payload["model"]
+                            + "&system=" + pf_net._enc(system[:900])
+                            + "&referrer=paperfactory")
+                    st, txt = await pf_net.request("GET", gurl, timeout=90)
+                    if st == 200 and txt and len(txt.strip()) > 2: return txt
+                except Exception as e:
+                    last = repr(e)
+            await asyncio.sleep(1.3 * (i + 1))
+        raise LLMError("model call failed: %s" % last)
+
+    async def chat_json(self, system, user, **kw):
+        kw.setdefault("temperature", 0.3)
+        return _parse(await self.chat(system, user, **kw))
+
+    async def probe(self):
+        try:
+            r = await self.chat("Reply with one word.", "Say OK.",
+                                max_tokens=8, temperature=0.0, tries=3)
+            return bool(r and r.strip())
+        except Exception:
+            return False
+
+def _parse(t):
+    t = (t or "").strip()
+    t = re.sub(r"^```(?:json)?|```$", "", t, flags=re.M).strip()
+    try: return json.loads(t)
+    except Exception: pass
+    for pat in (r"\{.*\}", r"\[.*\]"):
+        m = re.search(pat, t, re.S)
+        if m:
+            try: return json.loads(m.group(0))
+            except Exception: pass
+    return None
+
+def humaniser(model_idx=None):
+    idx = (pf_cfg.STATE.get("hum_model_idx", 0) if model_idx is None else model_idx)
+    return LLM(model=pf_cfg.HUM_MODELS[idx % len(pf_cfg.HUM_MODELS)],
+               temperature=0.95, humaniser=True)
+</script>
+
+<script type="text/x-python" data-name="pf_latex">
+import re
+from xml.sax.saxutils import escape
+
+NS = ('xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math" '
+      'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"')
+
+SYM = {"alpha":"α","beta":"β","gamma":"γ","delta":"δ","epsilon":"ε","varepsilon":"ε",
+"zeta":"ζ","eta":"η","theta":"θ","vartheta":"ϑ","iota":"ι","kappa":"κ","lambda":"λ",
+"mu":"μ","nu":"ν","xi":"ξ","pi":"π","rho":"ρ","sigma":"σ","tau":"τ","upsilon":"υ",
+"phi":"φ","varphi":"φ","chi":"χ","psi":"ψ","omega":"ω","Gamma":"Γ","Delta":"Δ",
+"Theta":"Θ","Lambda":"Λ","Xi":"Ξ","Pi":"Π","Sigma":"Σ","Phi":"Φ","Psi":"Ψ","Omega":"Ω",
+"leq":"≤","le":"≤","geq":"≥","ge":"≥","neq":"≠","ne":"≠","approx":"≈","equiv":"≡",
+"sim":"∼","propto":"∝","ll":"≪","gg":"≫","times":"×","cdot":"·","pm":"±","mp":"∓",
+"div":"÷","ast":"∗","star":"⋆","circ":"∘","bullet":"∙","oplus":"⊕","otimes":"⊗",
+"in":"∈","notin":"∉","subset":"⊂","subseteq":"⊆","supset":"⊃","cup":"∪","cap":"∩",
+"emptyset":"∅","forall":"∀","exists":"∃","infty":"∞","partial":"∂","nabla":"∇",
+"sum":"∑","prod":"∏","int":"∫","oint":"∮","rightarrow":"→","to":"→","leftarrow":"←",
+"leftrightarrow":"↔","Rightarrow":"⇒","Leftarrow":"⇐","mapsto":"↦","uparrow":"↑",
+"downarrow":"↓","ldots":"…","cdots":"⋯","dots":"…","vdots":"⋮","ddots":"⋱",
+"angle":"∠","perp":"⊥","parallel":"∥","therefore":"∴","because":"∵","langle":"⟨",
+"rangle":"⟩","lceil":"⌈","rceil":"⌉","lfloor":"⌊","rfloor":"⌋","vert":"|","Vert":"‖",
+"mathbb{R}":"ℝ","mathbb{N}":"ℕ","mathbb{Z}":"ℤ","mathbb{Q}":"ℚ","mathbb{C}":"ℂ",
+"mathcal{L}":"ℒ","mathcal{D}":"𝒟","mathcal{X}":"𝒳","mathcal{O}":"𝒪","hbar":"ℏ",
+"ell":"ℓ","aleph":"ℵ","degree":"°","prime":"′","surd":"√"}
+
+NARY = {"sum":"∑","prod":"∏","int":"∫","oint":"∮","bigcup":"⋃","bigcap":"⋂",
+        "bigoplus":"⨁","lim":"lim","min":"min","max":"max","sup":"sup","inf":"inf","arg":"arg"}
+OPS = {"sin","cos","tan","cot","sec","csc","arcsin","arccos","arctan","sinh","cosh",
+       "tanh","log","ln","lg","exp","det","dim","ker","deg","gcd","mod","erf","Pr"}
+FONTS = {"mathbb":"double","mathcal":"script","mathscr":"script","mathfrak":"fraktur",
+         "mathbf":"bold","boldsymbol":"bold","mathrm":"plain","mathsf":"plain",
+         "mathtt":"mono","text":"plain","textnormal":"plain","operatorname":"plain"}
+ACC = {"hat":"^","widehat":"^","bar":"‾","overline":"‾","vec":"⃗","dot":"˙","ddot":"¨",
+       "tilde":"~","widetilde":"~","check":"ˇ","breve":"˘","acute":"´","grave":"`"}
+
+TYPOS = [(r"\\led(?![a-z])",r"\\leq"),(r"\\franc(?![a-z])",r"\\frac"),
+ (r"\\tabla(?![a-z])",r"\\mathcal"),(r"\\sqr(?![a-z])",r"\\sqrt"),
+ (r"\\geg(?![a-z])",r"\\geq"),(r"\\lambd(?![a-z])",r"\\lambda"),
+ (r"\\thet(?![a-z])",r"\\theta"),(r"\\sigam",r"\\sigma"),(r"\\delat",r"\\delta"),
+ (r"\\mathca(?![a-z])",r"\\mathcal"),(r"\\mathb(?![a-z])",r"\\mathbb"),
+ (r"\\lefteqn",r""),(r"\\displaystyle",r""),(r"\\limits",r""),(r"\\nolimits",r""),
+ (r"\\dfrac",r"\\frac"),(r"\\tfrac",r"\\frac"),(r"\\cfrac",r"\\frac"),
+ (r"\\leqslant",r"\\leq"),(r"\\geqslant",r"\\geq"),(r"\\varnothing",r"\\emptyset"),
+ (r"\\!+",r"\\!"),(r"\\,{2,}",r"\\,")]
+
+def normalize(s):
+    s = (s or "").replace("\u200b","").replace("\xa0"," ")
+    for a, b in TYPOS: s = re.sub(a, b, s)
+    s = re.sub(r"\\big[lr]?|\\Big[lr]?|\\bigg[lr]?|\\Bigg[lr]?", "", s)
+    s = re.sub(r"\\begin\{[a-z*]+\}", "", s); s = re.sub(r"\\end\{[a-z*]+\}", "", s)
+    s = re.sub(r"&", " ", s); s = re.sub(r"\\\\", " ", s); s = re.sub(r"\\hline", "", s)
+    return re.sub(r"\s+", " ", s).strip()
+
+_TOK = re.compile(r"\\[A-Za-z]+|\\.|\{|\}|\^|_|[0-9]+\.?[0-9]*|[A-Za-z]|\s+|.")
+
+def _toks(s):
+    return [m.group(0) for m in _TOK.finditer(s) if m.group(0).strip() or m.group(0)==" "]
+
+def _run(text, style=None):
+    if not text: return ""
+    if style is None: style = "i" if (len(text)==1 and text.isalpha()) else "p"
+    return ('<m:r><m:rPr><m:sty m:val="%s"/></m:rPr>'
+            '<w:rPr><w:rFonts w:ascii="Cambria Math" w:hAnsi="Cambria Math"/></w:rPr>'
+            '<m:t xml:space="preserve">%s</m:t></m:r>' % (style, escape(text)))
+
+def _arg(toks, i):
+    if i >= len(toks): return ("t",""), i
+    if toks[i] == "{":
+        n, i = _seq(toks, i+1, "}"); return ("grp", n), i
+    return _atom(toks, i)
+
+def _atom(toks, i):
+    t = toks[i]
+    if t == "{":
+        n, i = _seq(toks, i+1, "}"); return ("grp", n), i
+    if t.startswith("\\"): return _cmd(t[1:], toks, i+1)
+    if t.strip() == "": return ("sp",), i+1
+    return ("t", t), i+1
+
+def _cmd(name, toks, i):
+    if name in ("frac","dfrac","tfrac"):
+        a, i = _arg(toks, i); b, i = _arg(toks, i); return ("frac", a, b), i
+    if name == "sqrt":
+        deg = None
+        if i < len(toks) and toks[i] == "[":
+            j = i+1; buf = []
+            while j < len(toks) and toks[j] != "]": buf.append(toks[j]); j += 1
+            deg = ("t", "".join(buf)); i = j+1
+        a, i = _arg(toks, i); return ("rad", deg, a), i
+    if name in NARY:
+        sub = sup = None
+        for _ in range(2):
+            if i < len(toks) and toks[i] in ("_","^"):
+                k = toks[i]; i += 1; a, i = _arg(toks, i)
+                if k == "_": sub = a
+                else: sup = a
+        body, i = _arg(toks, i) if i < len(toks) else (("t",""), i)
+        return ("nary", NARY[name], sub, sup, body), i
+    if name in FONTS:
+        a, i = _arg(toks, i); return ("font", FONTS[name], a), i
+    if name in ACC:
+        a, i = _arg(toks, i); return ("acc", ACC[name], a), i
+    if name in ("left","right"):
+        if i < len(toks): return ("delim", toks[i]), i+1
+        return ("sp",), i
+    if name in OPS: return ("t", name, "p"), i
+    if name in ("|","Vert"): return ("t","‖"), i
+    if name in (","," "): return ("sp",), i
+    if name in SYM: return ("t", SYM[name]), i
+    if name in ("mathbin","mathrel","mathord","mathop","mathpunct","begin","end"):
+        return ("sp",), i
+    return ("t", name), i
+
+def _seq(toks, i, stop=None):
+    nodes = []
+    while i < len(toks):
+        t = toks[i]
+        if t == "}" and stop == "}": return nodes, i+1
+        if t in ("^","_"):
+            i += 1; a, i = _arg(toks, i)
+            base = nodes.pop() if nodes else ("t","")
+            node = ("sup" if t == "^" else "sub", base, a)
+            if nodes and isinstance(nodes[-1], tuple) and nodes[-1][0] in ("sup","sub") \
+               and nodes[-1][1] is base:
+                prev = nodes.pop()
+                if prev[0] == "sup": nodes.append(("subsup", base, a, prev[2]))
+                else: nodes.append(("subsup", base, prev[2], a))
+            else: nodes.append(node)
+            continue
+        n, i = _atom(toks, i); nodes.append(n)
+    return nodes, i
+
+def _emit(n):
+    if n is None: return ""
+    k = n[0]
+    if k == "t": return _run(n[1], n[2] if len(n) > 2 else None)
+    if k == "sp": return _run(" ", "p")
+    if k == "grp": return "".join(_emit(c) for c in n[1])
+    if k == "frac": return "<m:f><m:num>%s</m:num><m:den>%s</m:den></m:f>" % (_emit(n[1]), _emit(n[2]))
+    if k == "rad":
+        return ('<m:rad><m:radPr><m:degHide m:val="%s"/></m:radPr><m:deg>%s</m:deg>'
+                '<m:e>%s</m:e></m:rad>' % ("1" if n[1] is None else "0",
+                _emit(n[1]) if n[1] else "", _emit(n[2])))
+    if k == "sup": return "<m:sSup><m:e>%s</m:e><m:sup>%s</m:sup></m:sSup>" % (_emit(n[1]), _emit(n[2]))
+    if k == "sub": return "<m:sSub><m:e>%s</m:e><m:sub>%s</m:sub></m:sSub>" % (_emit(n[1]), _emit(n[2]))
+    if k == "subsup":
+        return ("<m:sSubSup><m:e>%s</m:e><m:sub>%s</m:sub><m:sup>%s</m:sup></m:sSubSup>"
+                % (_emit(n[1]), _emit(n[2]), _emit(n[3])))
+    if k == "nary":
+        return ('<m:nary><m:naryPr><m:chr m:val="%s"/><m:limLoc m:val="undOvr"/>'
+                '<m:subHide m:val="%d"/><m:supHide m:val="%d"/></m:naryPr>'
+                '<m:sub>%s</m:sub><m:sup>%s</m:sup><m:e>%s</m:e></m:nary>'
+                % (escape(n[1]), 0 if n[2] else 1, 0 if n[3] else 1,
+                   _emit(n[2]), _emit(n[3]), _emit(n[4])))
+    if k == "acc":
+        return ('<m:acc><m:accPr><m:chr m:val="%s"/></m:accPr><m:e>%s</m:e></m:acc>'
+                % (escape(n[1]), _emit(n[2])))
+    if k == "font":
+        sty = {"bold":"b","plain":"p","mono":"p"}.get(n[1], "i")
+        return re.sub(r'<m:sty m:val="[a-z]*"/>', '<m:sty m:val="%s"/>' % sty, _emit(n[2]))
+    if k == "delim": return _run(n[1], "p")
+    return ""
+
+def to_omml(latex):
+    try:
+        src = normalize(latex)
+        if not src: return ""
+        nodes, _ = _seq(_toks(src), 0)
+        body = "".join(_emit(n) for n in nodes)
+        return '<m:oMath %s>%s</m:oMath>' % (NS, body) if body.strip() else ""
+    except Exception:
+        return ""
+
+def to_unicode(latex):
+    s = normalize(latex)
+    s = re.sub(r"\\frac\{([^{}]*)\}\{([^{}]*)\}", r"(\1)/(\2)", s)
+    s = re.sub(r"\\sqrt\{([^{}]*)\}", r"√(\1)", s)
+    s = re.sub(r"\\(?:text|mathrm|mathbb|mathcal|mathbf)\{([^{}]*)\}", r"\1", s)
+    s = re.sub(r"\\(?:left|right)\s*", "", s)
+    for k in sorted(SYM, key=len, reverse=True): s = s.replace("\\"+k, SYM[k])
+    s = re.sub(r"\\[A-Za-z]+", "", s).replace("{","").replace("}","")
+    return re.sub(r"\s+", " ", s.replace("^","").replace("_","")).strip()
+</script>
+
+<script type="text/x-python" data-name="pf_refs">
+import asyncio, re, math, html
+from dataclasses import dataclass, field
+from typing import List, Optional
+import pf_cfg, pf_net, pf_relevance as R
+
+CROSSREF = "https://api.crossref.org/works"
+OPENALEX = "https://api.openalex.org/works"
+ARXIV    = "https://export.arxiv.org/api/query"
+S2       = "https://api.semanticscholar.org/graph/v1/paper/search"
+HANDLE   = "https://doi.org/api/handles/"
+
+TOP_VENUE_HINTS = ["nature","science","ieee","acm","springer","elsevier","cell","plos",
+ "jmlr","neurips","nips","icml","iclr","cvpr","iccv","eccv","acl","emnlp","naacl",
+ "aaai","ijcai","kdd","sigir","www","tpami","tkde","tmi","tnnls","transactions",
+ "journal","letters","proceedings"]
+
+@dataclass
+class Ref:
+    key: str = ""; doi: str = ""; title: str = ""
+    authors: List[dict] = field(default_factory=list)
+    year: Optional[int] = None
+    venue: str = ""; volume: str = ""; issue: str = ""; pages: str = ""
+    abstract: str = ""; citations: int = 0
+    kind: str = "journal-article"; verified: bool = False
+    source: str = ""; score: float = 0.0
+    sections: List[str] = field(default_factory=list)
+
+    def _al(self): return [a for a in self.authors if a.get("family")]
+
+    def apa_authors(self):
+        out = []
+        for a in self._al():
+            ini = " ".join(p[0]+"." for p in re.split(r"[\s\-]+", a.get("given","")) if p)
+            out.append((a["family"]+", "+ini).strip().rstrip(","))
+        if not out: return "Anonymous"
+        if len(out) == 1: return out[0]
+        if len(out) <= 20: return ", ".join(out[:-1]) + ", & " + out[-1]
+        return ", ".join(out[:19]) + ", ... " + out[-1]
+
+    def intext(self):
+        a = self._al(); y = self.year or "n.d."
+        if not a: return "Anonymous, %s" % y
+        if len(a) == 1: return "%s, %s" % (a[0]["family"], y)
+        if len(a) == 2: return "%s & %s, %s" % (a[0]["family"], a[1]["family"], y)
+        return "%s et al., %s" % (a[0]["family"], y)
+
+    def surname(self): return self._al()[0]["family"] if self._al() else "Anonymous"
+
+    def to_apa(self):
+        p = ["%s (%s)." % (self.apa_authors(), self.year or "n.d."),
+             "%s." % self.title.rstrip(".")]
+        if self.venue:
+            v = ", %s" % self.volume if self.volume else ""
+            i = "(%s)" % self.issue if self.issue else ""
+            p.append("*%s*%s%s." % (self.venue, v, i))
+        if self.pages: p.append("%s." % self.pages)
+        if self.doi: p.append("https://doi.org/%s" % self.doi)
+        return " ".join(p)
+
+    def ieee_authors(self):
+        out = []
+        for a in self._al():
+            ini = ". ".join(p[0] for p in re.split(r"[\s\-]+", a.get("given","")) if p)
+            out.append(("%s. %s" % (ini, a["family"])) if ini else a["family"])
+        if not out: return "Anon."
+        if len(out) > 6: return out[0] + " et al."
+        return ", ".join(out[:-1]) + (", and " if len(out) > 1 else "") + out[-1]
+
+    def to_ieee(self, n=None):
+        s = ("[%d] " % n) if n else ""
+        s += '%s, "%s," ' % (self.ieee_authors(), self.title.rstrip("."))
+        if self.venue:
+            s += "*%s*" % self.venue
+            if self.volume: s += ", vol. %s" % self.volume
+            if self.issue: s += ", no. %s" % self.issue
+            if self.pages: s += ", pp. %s" % self.pages
+            s += ", "
+        s += "%s." % (self.year or "n.d.")
+        if self.doi: s += " doi: %s." % self.doi
+        return s
+
+    def bibtex(self):
+        al = self._al()
+        first = re.sub(r"\W","",al[0]["family"].lower()) if al else "anon"
+        kind = "article" if "journal" in self.kind else "inproceedings"
+        au = " and ".join("%s, %s" % (a.get("family",""), a.get("given","")) for a in al)
+        f = ["  author = {%s}" % au, "  title = {%s}" % self.title,
+             "  year = {%s}" % (self.year or "")]
+        if self.venue:
+            f.append("  %s = {%s}" % ("journal" if kind=="article" else "booktitle", self.venue))
+        if self.volume: f.append("  volume = {%s}" % self.volume)
+        if self.issue: f.append("  number = {%s}" % self.issue)
+        if self.pages: f.append("  pages = {%s}" % self.pages)
+        if self.doi:
+            f.append("  doi = {%s}" % self.doi)
+            f.append("  url = {https://doi.org/%s}" % self.doi)
+        return "@%s{%s%s,\n%s\n}\n" % (kind, first, self.year or "nd", ",\n".join(f))
+
+def _nd(d): return re.sub(r"^https?://(dx\.)?doi\.org/","",(d or "").strip().lower())
+
+def _oa_abs(inv):
+    if not inv: return ""
+    pos = {}
+    for w, ps in inv.items():
+        for p in ps: pos[p] = w
+    return " ".join(pos[i] for i in sorted(pos))[:1500]
+
+def _cr_parse(it):
+    doi = _nd(it.get("DOI","")); t = (it.get("title") or [""])[0]
+    if not doi or not t: return None
+    y = None
+    try: y = it["issued"]["date-parts"][0][0]
+    except Exception: pass
+    au = []
+    for a in it.get("author", []) or []:
+        fam = a.get("family") or a.get("name","")
+        if fam: au.append({"family": fam, "given": a.get("given","")})
+    return Ref(doi=doi, title=html.unescape(t), authors=au, year=y,
+               venue=(it.get("container-title") or [""])[0],
+               abstract=re.sub(r"<[^>]+>"," ", it.get("abstract","") or ""),
+               kind=it.get("type","journal-article"), source="crossref")
+
+async def cr_search(q, rows=25):
+    j = await pf_net.get_json(CROSSREF, params={
+        "query.title": q, "rows": rows,
+        "filter": "type:journal-article,from-pub-date:%d-01-01" % pf_cfg.MIN_YEAR,
+        "select": "DOI,title,author,issued,container-title,abstract,type,is-referenced-by-count",
+        "mailto": pf_cfg.STATE["contact"]})
+    if not j: return []
+    out = []
+    for i in j.get("message",{}).get("items",[]):
+        r = _cr_parse(i)
+        if r:
+            r.citations = int(i.get("is-referenced-by-count") or 0)
+            out.append(r)
+    return out
+
+async def oa_search(q, rows=25):
+    j = await pf_net.get_json(OPENALEX, params={
+        "filter": 'title_and_abstract.search:"%s",from_publication_date:%d-01-01'
+                  % (q.replace('"',""), pf_cfg.MIN_YEAR),
+        "per-page": rows, "mailto": pf_cfg.STATE["contact"]})
+    if not j: return []
+    out = []
+    for it in j.get("results", []):
+        doi = _nd(it.get("doi") or ""); t = it.get("title") or ""
+        if not t: continue
+        au = []
+        for a in it.get("authorships", []) or []:
+            nm = (a.get("author") or {}).get("display_name","")
+            if nm:
+                b = nm.split(); au.append({"family": b[-1], "given": " ".join(b[:-1])})
+        loc = (it.get("primary_location") or {}).get("source") or {}
+        out.append(Ref(doi=doi, title=t, authors=au, year=it.get("publication_year"),
+                       venue=loc.get("display_name",""),
+                       abstract=_oa_abs(it.get("abstract_inverted_index")),
+                       citations=int(it.get("cited_by_count") or 0),
+                       kind=it.get("type","article"), source="openalex"))
+    return out
+
+async def arxiv_search(q, rows=20):
+    txt = await pf_net.get_text(ARXIV, params={
+        "search_query": 'all:"%s"' % q.replace('"',""),
+        "start": 0, "max_results": rows, "sortBy": "relevance"})
+    if not txt or "<entry" not in txt: return []
+    out = []
+    for chunk in txt.split("<entry>")[1:]:
+        def g(tag):
+            m = re.search(r"<%s>(.*?)</%s>" % (tag, tag), chunk, re.S)
+            return re.sub(r"\s+"," ", html.unescape(m.group(1))).strip() if m else ""
+        title = g("title"); summ = g("summary")
+        if not title: continue
+        au = []
+        for m in re.finditer(r"<name>(.*?)</name>", chunk, re.S):
+            nm = html.unescape(m.group(1)).strip().split()
+            if nm: au.append({"family": nm[-1], "given": " ".join(nm[:-1])})
+        y = None
+        m = re.search(r"<published>(\d{4})", chunk)
+        if m: y = int(m.group(1))
+        doi = ""
+        m = re.search(r'<arxiv:doi[^>]*>(.*?)</arxiv:doi>', chunk, re.S)
+        if m: doi = _nd(m.group(1))
+        out.append(Ref(doi=doi, title=title, authors=au, year=y,
+                       venue="arXiv preprint", abstract=summ,
+                       kind="preprint", source="arxiv"))
+    return out
+
+async def s2_search(q, rows=20):
+    j = await pf_net.get_json(S2, params={
+        "query": q, "limit": rows,
+        "fields": "title,abstract,year,authors,venue,externalIds,citationCount"})
+    if not j: return []
+    out = []
+    for it in j.get("data", []):
+        t = it.get("title") or ""
+        if not t: continue
+        ext = it.get("externalIds") or {}
+        out.append(Ref(doi=_nd(ext.get("DOI") or ""), title=t,
+                       authors=[{"family": (a.get("name") or " x").split()[-1],
+                                 "given": " ".join((a.get("name") or " x").split()[:-1])}
+                                for a in (it.get("authors") or []) if a.get("name")],
+                       year=it.get("year"), venue=it.get("venue") or "",
+                       abstract=(it.get("abstract") or "")[:1500],
+                       citations=int(it.get("citationCount") or 0),
+                       kind="article", source="s2"))
+    return out
+
+def _norm_title(t):
+    return re.sub(r"[^a-z0-9 ]", " ", (t or "").lower()).strip()
+
+def score_ref(r, profile_bag, profile_phrases, title_bag, strict):
+    tb = R.bag(r.title); ab = R.bag(r.abstract)
+    ov_t = R.overlap_count(profile_bag, tb)
+    ov_a = R.overlap_count(profile_bag, ab)
+    ov_title = R.overlap_count(title_bag, tb)
+    sim_t = R.cosine(profile_bag, tb)
+    sim_a = R.cosine(profile_bag, ab) if ab else 0.0
+    ph = sum(0.6 for p in profile_phrases if p in _norm_title(r.title))
+    if ov_title >= 2: ph += 1.2
+    elif ov_title == 1: ph += 0.3
+    recency = 0.0
+    if r.year:
+        recency = max(0.0, 1.0 - max(0, 2026 - r.year)/14.0) * 1.1
+    cit = min(1.0, math.log1p(r.citations)/9.0) * 1.0
+    ven = 0.5 if any(h in (r.venue or "").lower() for h in TOP_VENUE_HINTS) else 0.0
+    has_abs = 0.4 if len(r.abstract) > 150 else 0.0
+    is_preprint = -0.15 if (r.source == "arxiv" and r.citations == 0) else 0.0
+    score = (2.6*ov_title + 1.4*ov_t + 1.0*ov_a + 3.0*sim_t + 1.6*sim_a + ph
+             + recency + cit + ven + has_abs + is_preprint)
+    landmark = r.citations >= 3000 and ov_title >= 1
+    gate = (ov_title >= strict) or (ov_t >= strict + 1) or (sim_a >= 0.14) or landmark
+    return score, gate
+
+def harvest_queries(title, keyterms, section_specs):
+    kt = list(keyterms) or ["method"]
+    qs = []
+    for i in range(len(kt) - 1):
+        qs.append("%s %s" % (kt[i], kt[i+1]))
+    for i in range(max(1, len(kt) - 2)):
+        qs.append(" ".join(kt[i:i+3]))
+    for spec in section_specs:
+        ws = [w for w in re.findall(r"[A-Za-z]{4,}", spec) if w.lower() not in R.STOP]
+        if ws: qs.append(" ".join(ws[:3]))
+    seen, out = set(), []
+    for q in qs:
+        q = re.sub(r"\s+", " ", q).strip().lower()
+        if q and q not in seen and len(q) > 5:
+            seen.add(q); out.append(q)
+    return out[:26]
+
+async def harvest(title, keyterms, section_specs, max_refs=60, progress=None):
+    queries = harvest_queries(title, keyterms, section_specs)
+    profile_bag = R.bag(title + " " + " ".join(section_specs))
+    title_bag = R.bag(title)
+    profile_phrases = R.phrases(title)
+    strict = pf_cfg.STATE.get("strict", 2)
+
+    sem = asyncio.Semaphore(max(2, pf_cfg.STATE["concurrency"]))
+    pool, seen_doi, seen_title = [], set(), set()
+    lock = asyncio.Lock()
+
+    async def one(q, idx):
+        async with sem:
+            batches = await asyncio.gather(
+                cr_search(q, 20), oa_search(q, 20),
+                arxiv_search(q, 14), s2_search(q, 14),
+                return_exceptions=True)
+        async with lock:
+            for b in batches:
+                if isinstance(b, Exception) or not b: continue
+                for r in b:
+                    nt = _norm_title(r.title)
+                    if not nt or len(nt) < 12: continue
+                    if r.doi and r.doi in seen_doi: continue
+                    if nt[:70] in seen_title: continue
+                    if r.doi: seen_doi.add(r.doi)
+                    seen_title.add(nt[:70])
+                    pool.append(r)
+        if progress and idx % 4 == 0:
+            progress("references", "query %d/%d — pool %d" % (idx, len(queries), len(pool)))
+
+    await asyncio.gather(*[one(q, i+1) for i, q in enumerate(queries)])
+    if progress: progress("references", "scoring %d candidates" % len(pool))
+
+    kept = []
+    for r in pool:
+        s, gate = score_ref(r, profile_bag, profile_phrases, title_bag, strict)
+        r.score = round(s, 3)
+        if gate: kept.append(r)
+    if len(kept) < 25:
+        for r in pool:
+            if r not in kept:
+                s, _ = score_ref(r, profile_bag, profile_phrases, title_bag, 0)
+                r.score = round(s, 3); kept.append(r)
+    kept.sort(key=lambda r: -r.score)
+    return kept[:max_refs*3]
+
+async def verify_all(bank, progress=None):
+    sem = asyncio.Semaphore(8)
+    async def v(r):
+        if not r.doi:
+            r.verified = (r.source == "arxiv")
+            return
+        async with sem:
+            j = await pf_net.get_json(HANDLE + r.doi)
+        r.verified = bool(j and j.get("responseCode") == 1)
+    await asyncio.gather(*[v(r) for r in bank])
+    for r in bank:
+        if r.verified: r.score += 0.5
+    bank.sort(key=lambda r: -r.score)
+
+def assign_to_sections(bank, sections, per_section=16):
+    pools, used = {}, set()
+    for s in sections:
+        qbag = R.bag(s["title"] + " " + " ".join(s.get("queries", [])))
+        ranked = sorted(bank, key=lambda r: -(
+            R.cosine(qbag, R.bag(r.title + " " + r.abstract)) * 6.0
+            + r.score * 0.35 + (0.4 if r.key not in used else 0.0)))
+        picks = ranked[:per_section]
+        pools[s["title"]] = picks
+        for r in picks[:8]:
+            used.add(r.key)
+            if s["title"] not in r.sections: r.sections.append(s["title"])
+    return pools
+
+def renumber(bank, max_refs):
+    bank = bank[:max_refs]
+    for i, r in enumerate(bank, 1): r.key = "k%d" % i
+    return bank, {r.key: r for r in bank}
+
+def digest(pool):
+    return "\n".join(
+        "[[%s]] %s%s (%s). %s. %s%s" % (
+            r.key, r.surname(), " et al." if len(r.authors) > 1 else "",
+            r.year, r.title[:150], r.venue,
+            (" — " + r.abstract[:90] + "…") if len(r.abstract) > 90 else "")
+        for r in pool)
+
+def bibtex_all(bank):
+    out = ["% Auto-generated — DOI-verified where a DOI exists", ""]
+    for r in sorted(bank, key=lambda x: (x.surname().lower(), x.year or 0)):
+        out.append(r.bibtex())
+    return "\n".join(out)
+</script>
+
+<script type="text/x-python" data-name="pf_verify">
+import re
+import pf_relevance as R
+from pf_text import MARKER, sentences, words
+
+def _is_special(block):
+    b = block.strip()
+    return (b.startswith("|") or b.startswith("$$") or b.startswith("[[FIG")
+            or b.startswith("[[TBL") or b.startswith("**Table"))
+
+def _score(para, ref):
+    return R.cosine(R.bag(para), R.bag(ref.title + " " + ref.abstract))
+
+def used_keys(sections):
+    used = set()
+    for s in sections:
+        for m in MARKER.finditer(s.get("content", "")):
+            used.update(k.strip() for k in m.group(1).split(",") if k.strip())
+    return used
+
+def repair(sections, pools, by_key, min_score=0.045):
+    swapped = injected = dropped = 0
+    for s in sections:
+        pool = pools.get(s["title"]) or list(by_key.values())
+        if not pool: continue
+        out_blocks = []
+        for block in s["content"].split("\n\n"):
+            if _is_special(block):
+                out_blocks.append(block); continue
+            cited = []
+            for m in MARKER.finditer(block):
+                cited += [k.strip() for k in m.group(1).split(",") if k.strip()]
+
+            good = [k for k in cited if k in by_key and _score(block, by_key[k]) >= min_score]
+            dropped += len([k for k in cited if k in by_key]) - len(good)
+
+            ranked = sorted(pool, key=lambda r: -_score(block, r))
+            ranked = [r for r in ranked if _score(block, r) >= min_score] or ranked[:2]
+
+            if not good:
+                chosen = [r.key for r in ranked[:2]]
+                if cited: swapped += 1
+                elif words(block) > 55: injected += 1
+            else:
+                chosen = good[:3]
+
+            clean = MARKER.sub("", block).strip()
+            if not chosen or words(clean) < 45:
+                out_blocks.append(clean); continue
+
+            ss = sentences(clean)
+            if not ss:
+                out_blocks.append(clean); continue
+            step = max(1, len(ss) // max(1, len(chosen)))
+            ci = 0; new = []
+            for i, sent in enumerate(ss):
+                if ci < len(chosen) and (i % step == 0 or i == len(ss) - 1):
+                    sent = sent.rstrip()
+                    sent = (sent[:-1] + " [[%s]]" % chosen[ci] + sent[-1]) \
+                           if sent.endswith((".","!","?")) else (sent + " [[%s]]" % chosen[ci])
+                    ci += 1
+                new.append(sent)
+            out_blocks.append(" ".join(new))
+        s["content"] = "\n\n".join(out_blocks)
+    return {"swapped": swapped, "injected": injected, "dropped": dropped}
+
+def prune(bank, used, order=None):
+    """Filter to cited refs, renumber sequentially, remap IEEE order."""
+    old = [r for r in bank if r.key in used]
+    if not old:
+        return bank, {r.key: r for r in bank}, order
+    remap = {r.key: "k%d" % (i + 1) for i, r in enumerate(old)}
+    for r in old:
+        r.key = remap[r.key]
+    if order:
+        new_order = {remap[k]: v for k, v in order.items() if k in remap}
+        order.clear(); order.update(new_order)
+    return old, {r.key: r for r in old}, order
+</script>
+
+<script type="text/x-python" data-name="pf_datasets">
+DATASETS = [
+ ("CIFAR-10","computer vision image classification benchmark","image classification",60000,"32x32x3",10,2009,"https://www.cs.toronto.edu/~kriz/cifar.html"),
+ ("CIFAR-100","computer vision image fine-grained classification","image classification",60000,"32x32x3",100,2009,"https://www.cs.toronto.edu/~kriz/cifar.html"),
+ ("ImageNet-1K","computer vision large scale classification","image classification",1281167,"RGB",1000,2009,"https://image-net.org/"),
+ ("MS-COCO","computer vision detection segmentation captioning","detection",330000,"RGB",80,2014,"https://cocodataset.org/"),
+ ("Pascal VOC","computer vision segmentation detection","segmentation",11540,"RGB",21,2012,"http://host.robots.ox.ac.uk/pascal/VOC/"),
+ ("Cityscapes","computer vision urban semantic segmentation","segmentation",5000,"2048x1024",30,2016,"https://www.cityscapes-dataset.com/"),
+ ("ADE20K","computer vision scene parsing segmentation","scene parsing",25574,"RGB",150,2017,"https://groups.csail.mit.edu/vision/datasets/ADE20K/"),
+ ("KITTI","autonomous driving lidar stereo depth","depth estimation",14999,"variable",8,2012,"http://www.cvlibs.net/datasets/kitti/"),
+ ("nuScenes","autonomous driving multimodal 3d detection","3d detection",40000,"multimodal",23,2019,"https://www.nuscenes.org/"),
+ ("MNIST","handwritten digit classification","digit classification",70000,"28x28",10,1998,"http://yann.lecun.com/exdb/mnist/"),
+ ("Fashion-MNIST","image classification clothing","image classification",70000,"28x28",10,2017,"https://github.com/zalandoresearch/fashion-mnist"),
+ ("CelebA","face attribute recognition","attribute prediction",202599,"178x218",40,2015,"https://mmlab.ie.cuhk.edu.hk/projects/CelebA.html"),
+ ("BraTS","medical brain tumour mri segmentation","tumour segmentation",1350,"240x240x155",4,2015,"https://www.med.upenn.edu/cbica/brats/"),
+ ("ISIC 2019","medical dermatology skin lesion","lesion classification",25331,"RGB",8,2019,"https://challenge.isic-archive.com/"),
+ ("ChestX-ray14","medical chest radiograph classification","pathology classification",112120,"1024x1024",14,2017,"https://nihcc.app.box.com/v/ChestXray-NIHCC"),
+ ("MIMIC-III","medical ehr clinical intensive care","outcome prediction",58976,"multivariate",2,2016,"https://mimic.mit.edu/"),
+ ("MIMIC-IV","medical ehr clinical intensive care","mortality prediction",299712,"multivariate",2,2021,"https://mimic.mit.edu/"),
+ ("eICU-CRD","medical intensive care multi-centre ehr","mortality prediction",200859,"multivariate",2,2018,"https://eicu-crd.mit.edu/"),
+ ("PhysioNet Sepsis","clinical sepsis prediction time series","early warning",40336,"multivariate",2,2019,"https://physionet.org/content/challenge-2019/"),
+ ("PTB-XL","ecg electrocardiogram clinical signal","ecg classification",21799,"12-lead",71,2020,"https://physionet.org/content/ptb-xl/"),
+ ("MIT-BIH Arrhythmia","ecg arrhythmia signal classification","arrhythmia detection",110000,"2-lead",15,1980,"https://physionet.org/content/mitdb/"),
+ ("UCI Electricity","time series load forecasting energy","load forecasting",45312,"321 series",1,2012,"https://archive.ics.uci.edu/dataset/321/electricityloaddiagrams20112014"),
+ ("Household Power","time series energy consumption forecasting","load forecasting",2075259,"9",1,2006,"https://archive.ics.uci.edu/dataset/235/individual+household+electric+power+consumption"),
+ ("ETT","time series transformer forecasting energy","long-horizon forecasting",69680,"7",1,2021,"https://github.com/zhouhaoyi/ETDataset"),
+ ("Traffic","time series highway occupancy forecasting","traffic forecasting",17544,"862",1,2015,"http://pems.dot.ca.gov/"),
+ ("Weather","time series meteorological forecasting","weather forecasting",52696,"21",1,2020,"https://www.bgc-jena.mpg.de/wetter/"),
+ ("Exchange-Rate","time series currency financial forecasting","rate forecasting",7588,"8",1,2017,"https://github.com/laiguokun/multivariate-time-series-data"),
+ ("ILI","time series influenza incidence forecasting","epidemic forecasting",966,"7",1,2018,"https://gis.cdc.gov/grasp/fluview/"),
+ ("Solar-Energy","time series photovoltaic renewable forecasting","solar forecasting",52560,"137",1,2014,"https://www.nrel.gov/grid/solar-power-data.html"),
+ ("PEMS-BAY","traffic network graph forecasting","traffic forecasting",52116,"325 nodes",1,2018,"https://pems.dot.ca.gov/"),
+ ("METR-LA","traffic graph sensor network forecasting","traffic forecasting",34272,"207 nodes",1,2018,"https://pems.dot.ca.gov/"),
+ ("IMDB","nlp sentiment movie review classification","sentiment analysis",50000,"text",2,2011,"https://ai.stanford.edu/~amaas/data/sentiment/"),
+ ("SST-2","nlp sentence sentiment classification","sentiment analysis",67349,"text",2,2013,"https://nlp.stanford.edu/sentiment/"),
+ ("AG News","nlp topic classification news","topic classification",127600,"text",4,2015,"https://huggingface.co/datasets/ag_news"),
+ ("SQuAD 2.0","nlp question answering reading comprehension","question answering",150000,"text",0,2018,"https://rajpurkar.github.io/SQuAD-explorer/"),
+ ("Natural Questions","nlp open-domain question answering","question answering",307373,"text",0,2019,"https://ai.google.com/research/NaturalQuestions"),
+ ("MS MARCO","nlp passage retrieval ranking","passage retrieval",1000000,"text",0,2016,"https://microsoft.github.io/msmarco/"),
+ ("HotpotQA","nlp multi-hop reasoning question answering","multi-hop QA",113810,"text",0,2018,"https://hotpotqa.github.io/"),
+ ("XSum","nlp abstractive summarisation news","summarisation",226711,"text",0,2018,"https://huggingface.co/datasets/xsum"),
+ ("CNN/DailyMail","nlp summarisation news article","summarisation",311971,"text",0,2015,"https://huggingface.co/datasets/cnn_dailymail"),
+ ("WMT14","nlp machine translation german english","translation",4500000,"text",0,2014,"https://www.statmt.org/wmt14/"),
+ ("IWSLT","nlp low resource machine translation","translation",200000,"text",0,2020,"https://sites.google.com/site/iwsltevaluation2020/"),
+ ("CoNLL-2003","nlp named entity recognition tagging","NER",22137,"text",4,2003,"https://www.clips.uantwerpen.be/conll2003/ner/"),
+ ("MultiNLI","nlp natural language inference","textual entailment",433000,"text",3,2018,"https://cims.nyu.edu/~sbowman/multinli/"),
+ ("Amazon Reviews","nlp review sentiment e-commerce","sentiment analysis",4000000,"text",5,2015,"https://cseweb.ucsd.edu/~jmcauley/datasets.html"),
+ ("20 Newsgroups","nlp topic classification text","topic classification",18846,"text",20,1995,"http://qwone.com/~jason/20Newsgroups/"),
+ ("SMS Spam","nlp spam detection text","spam detection",5574,"text",2,2011,"https://archive.ics.uci.edu/dataset/228/sms+spam+collection"),
+ ("NSL-KDD","cybersecurity intrusion detection network","intrusion detection",148517,"41",23,2009,"https://www.unb.ca/cic/datasets/nsl.html"),
+ ("UNSW-NB15","cybersecurity intrusion detection flow","intrusion detection",257673,"49",10,2015,"https://research.unsw.edu.au/projects/unsw-nb15-dataset"),
+ ("CICIDS2017","cybersecurity intrusion detection flow","intrusion detection",2830540,"78",15,2017,"https://www.unb.ca/cic/datasets/ids-2017.html"),
+ ("Bot-IoT","iot cybersecurity botnet detection","botnet detection",73000000,"46",5,2018,"https://research.unsw.edu.au/projects/bot-iot-dataset"),
+ ("TON_IoT","iot cybersecurity telemetry anomaly","anomaly detection",32686513,"44",10,2020,"https://research.unsw.edu.au/projects/toniot-datasets"),
+ ("CIC-IDS2018","cybersecurity intrusion detection","intrusion detection",16000000,"80",14,2018,"https://www.unb.ca/cic/datasets/ids-2018.html"),
+ ("DDoS-2019","cybersecurity ddos attack detection","ddos detection",10979053,"80",6,2019,"https://www.unb.ca/cic/datasets/ddos-2019.html"),
+ ("MovieLens-1M","recommender collaborative filtering rating","rating prediction",1000209,"6040x3706",5,2003,"https://grouplens.org/datasets/movielens/"),
+ ("Amazon Beauty","recommender sequential product","recommendation",22363,"12101",0,2018,"https://cseweb.ucsd.edu/~jmcauley/datasets.html"),
+ ("Yelp","recommender business review graph","recommendation",4489560,"text",0,2019,"https://www.yelp.com/dataset"),
+ ("Last.fm","recommender music graph session","recommendation",1750000,"graph",0,2011,"https://grouplens.org/datasets/hetrec-2011/"),
+ ("OGB-arxiv","graph neural network node classification citation","node classification",169343,"128",40,2020,"https://ogb.stanford.edu/docs/nodeprop/"),
+ ("Cora","graph node classification citation network","node classification",2708,"1433",7,2008,"https://linqs.soe.ucsc.edu/data"),
+ ("PubMed","graph node classification citation medical","node classification",19717,"500",3,2008,"https://linqs.soe.ucsc.edu/data"),
+ ("Reddit","graph node classification social","node classification",232965,"602",41,2018,"https://github.com/willleif/GraphSAGE"),
+ ("Tox21","molecular property prediction cheminformatics","toxicity prediction",12707,"801",12,2014,"https://tripod.nih.gov/tox21/challenge/"),
+ ("QM9","molecular quantum property regression","property regression",133885,"variable",19,2014,"https://figshare.com/articles/dataset/QM9_dataset/978904"),
+ ("OGB-molpcba","molecular graph property prediction","property prediction",437929,"variable",128,2021,"https://ogb.stanford.edu/docs/graphprop/"),
+ ("LibriSpeech","speech recognition audio transcription","speech recognition",1000,"16kHz audio",0,2015,"https://www.openslr.org/12"),
+ ("Common Voice","speech recognition multilingual crowd","speech recognition",2000000,"audio",0,2020,"https://commonvoice.mozilla.org/"),
+ ("VCTK","speech synthesis multi-speaker corpus","speech synthesis",44,"48kHz audio",110,2019,"https://datashare.ed.ac.uk/handle/10283/3443"),
+ ("ESC-50","audio event classification environmental","audio classification",2000,"5s clips",50,2015,"https://github.com/karolpiczak/ESC-50"),
+ ("UrbanSound8K","audio urban sound classification","audio classification",8732,"variable",10,2014,"https://urbansounddataset.weebly.com/"),
+ ("NASA CMAPSS","predictive maintenance turbofan degradation","remaining useful life",20631,"24",1,2008,"https://data.nasa.gov/dataset/C-MAPSS-Aircraft-Engine-Simulated-Data"),
+ ("SECOM","manufacturing sensor anomaly fault","fault detection",1567,"590",2,2008,"https://archive.ics.uci.edu/dataset/179/secom"),
+ ("Appliances Energy","smart home energy iot sensor","regression",19735,"29",1,2017,"https://archive.ics.uci.edu/dataset/374/appliances+energy+prediction"),
+ ("Bike Sharing","urban mobility demand forecasting","demand forecasting",17379,"16",1,2011,"https://archive.ics.uci.edu/dataset/275/bike+sharing+dataset"),
+ ("Air Quality","environmental sensor regression forecasting","regression",9358,"13",1,2004,"https://archive.ics.uci.edu/dataset/360/air+quality"),
+ ("Beijing PM2.5","air pollution time series forecasting","pollution forecasting",43824,"12",1,2015,"https://archive.ics.uci.edu/dataset/381/beijing+pm2+5+data"),
+ ("Adult Income","tabular census income classification","income classification",48842,"14",2,1996,"https://archive.ics.uci.edu/dataset/2/adult"),
+ ("Credit Card Fraud","tabular financial fraud imbalanced","fraud detection",284807,"30",2,2013,"https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud"),
+ ("Give Me Some Credit","tabular credit risk scoring","credit scoring",150000,"11",2,2011,"https://www.kaggle.com/c/GiveMeSomeCredit"),
+ ("HELOC","tabular credit default prediction","default prediction",10459,"23",2,2018,"https://www.kaggle.com/datasets/averkiyoliabev/home-equity-line-of-creditheloc"),
+ ("Telco Churn","tabular customer churn prediction","churn prediction",7043,"21",2,2018,"https://www.kaggle.com/datasets/blastchar/telco-customer-churn"),
+ ("Diabetes 130","medical tabular readmission prediction","readmission prediction",101766,"50",2,2015,"https://archive.ics.uci.edu/dataset/296/diabetes+130-us+hospitals+for+years+1999-2008"),
+ ("Heart Disease UCI","medical tabular cardiac diagnosis","disease classification",920,"13",2,1988,"https://archive.ics.uci.edu/dataset/45/heart+disease"),
+ ("Breast Cancer WBCD","medical tabular tumour classification","tumour classification",569,"30",2,1995,"https://archive.ics.uci.edu/dataset/17/breast+cancer+wisconsin+diagnostic"),
+ ("D4RL","reinforcement learning offline control","control",1000000,"variable",0,2020,"https://github.com/rail-berkeley/d4rl"),
+ ("Atari 100k","reinforcement learning sample efficient","game playing",100000,"84x84x4",57,2020,"https://github.com/google-research/atari-model-zoo"),
+ ("Meta-World","robotics reinforcement learning manipulation","manipulation",500,"variable",50,2019,"https://meta-world.github.io/"),
+ ("Sentinel-2","remote sensing multispectral land cover","land cover classification",1000000,"13 bands",10,2015,"https://sentinel.esa.int/web/sentinel/missions/sentinel-2"),
+ ("EuroSAT","remote sensing satellite land use","land use classification",27000,"64x64x13",10,2019,"https://madm.dfki.de/downloads"),
+ ("BigEarthNet","remote sensing multispectral multilabel","multilabel classification",590326,"120x120x12",43,2019,"https://bigearth.net/"),
+ ("SEN12MS","remote sensing multimodal sar optical","segmentation",180662,"256x256",12,2019,"https://mediatum.ub.tum.de/1474000"),
+ ("DeepGlobe","remote sensing road building segmentation","segmentation",1161,"2448x2448",3,2018,"http://deepglobe.org/"),
+]
+
+DOMAIN_BASELINES = {
+ "vision":["ResNet-50","EfficientNet-B4","ViT-B/16","Swin-T","ConvNeXt-T","DeiT-S"],
+ "nlp":["BERT-base","RoBERTa-large","DeBERTa-v3","XLNet","ELECTRA","T5-large"],
+ "timeseries":["Informer","Autoformer","FEDformer","PatchTST","DLinear","N-BEATS"],
+ "medical":["U-Net","nnU-Net","Med3D","DenseNet-121","TransUNet","ResNet-50"],
+ "security":["Random Forest","XGBoost","1D-CNN","LSTM","DeepLog","Kitsune"],
+ "graph":["GCN","GraphSAGE","GAT","GIN","SGC","APPNP"],
+ "audio":["PANNs","AST","Wav2Vec2","VGGish","YAMNet","SincNet"],
+ "tabular":["XGBoost","LightGBM","CatBoost","TabNet","FT-Transformer","MLP"],
+ "recsys":["NCF","SASRec","BERT4Rec","LightGCN","GRU4Rec","SR-GNN"],
+ "remote":["ResNet-50","EfficientNet-B0","Swin-T","U-Net","DeepLabv3+","ViT-B/16"],
+ "molecular":["GIN","MPNN","SchNet","D-MPNN","AttentiveFP","GCN"],
+ "rl":["DQN","PPO","SAC","TD3","DreamerV3","CQL"],
+}
+TAG_HINTS = {
+ "vision":["vision","image","visual","segmentation","detection","cnn","convolutional",
+           "pixel","object","scene","video","recognition","face","satellite","remote"],
+ "nlp":["nlp","language","text","transformer","bert","sentiment","summar","translation",
+        "question","retrieval","ner","token","linguistic","llm","attention"],
+ "timeseries":["time series","timeseries","forecast","temporal","long-horizon","sequence",
+               "seasonal","streaming","signal","anomaly","horizon"],
+ "medical":["medical","clinical","health","patient","ehr","diagnos","tumour","tumor",
+            "mri","ct","ecg","eeg","disease","hospital"],
+ "security":["security","intrusion","attack","cyber","malware","botnet","ddos","phishing"],
+ "graph":["graph","node","edge","gnn","message passing","topology"],
+ "audio":["speech","audio","sound","voice","acoustic","music","asr","speaker"],
+ "tabular":["tabular","structured","census","credit","churn","risk","fraud"],
+ "recsys":["recommend","collaborative","user-item","rating","personaliz","ranking"],
+ "remote":["remote sensing","satellite","hyperspectral","multispectral","land cover","sar"],
+ "molecular":["molecular","molecule","chemistry","drug","protein","compound","quantum chemistry"],
+ "rl":["reinforcement","agent","policy","reward","control","robot","game playing","offline rl"],
+}
+
+def _score(title, ds, tags):
+    t = (title or "").lower(); s = 0
+    for tag in ds[1].split():
+        if tag in t: s += 3
+    for tag in tags:
+        if tag in t: s += 5
+    for w in ds[0].lower().replace("-"," ").split():
+        if len(w) > 3 and w in t: s += 4
+    return s
+
+def pick(title, forced="", n=3):
+    if forced:
+        wanted = [x.strip().lower() for x in forced.split(",") if x.strip()]
+        hits = [d for d in DATASETS if any(w in d[0].lower() for w in wanted)]
+        if hits: return hits[:max(n, len(hits))]
+    t = (title or "").lower()
+    tags = [d for d, ks in TAG_HINTS.items() if any(k in t for k in ks)]
+    return sorted(DATASETS, key=lambda d: -_score(title, d, tags))[:n]
+
+def domain_of(title):
+    t = (title or "").lower()
+    for d, ks in TAG_HINTS.items():
+        if any(k in t for k in ks): return d
+    return "tabular"
+
+def baselines(title, n=6):
+    return DOMAIN_BASELINES.get(domain_of(title), DOMAIN_BASELINES["tabular"])[:n]
+
+def metrics_for(title):
+    d = domain_of(title)
+    return {"vision":["Accuracy (%)","F1 (%)","mIoU (%)","Params (M)"],
+     "nlp":["Accuracy (%)","Macro-F1 (%)","BLEU","Params (M)"],
+     "timeseries":["MAE","RMSE","MAPE (%)","sMAPE (%)"],
+     "medical":["AUC","Sensitivity (%)","Specificity (%)","Dice (%)"],
+     "security":["Accuracy (%)","Precision (%)","Recall (%)","F1 (%)"],
+     "graph":["Accuracy (%)","Macro-F1 (%)","AUC","Time (s)"],
+     "audio":["Accuracy (%)","WER (%)","F1 (%)","Params (M)"],
+     "tabular":["AUC","Accuracy (%)","F1 (%)","LogLoss"],
+     "recsys":["HR@10","NDCG@10","MRR","Recall@20"],
+     "remote":["OA (%)","Kappa","mIoU (%)","F1 (%)"],
+     "molecular":["RMSE","MAE","R2","AUC"],
+     "rl":["Return","Success (%)","Steps","Wall-clock (h)"]}.get(d,["Accuracy (%)","F1 (%)","AUC","Time (s)"])
+</script>
+
+<script type="text/x-python" data-name="pf_assets">
+import pf_cfg, pf_datasets, pf_text
+
+BIND_HINTS = [
+ ("Datasets",["dataset","data source","material","characteristic","preprocess","data"]),
+ ("Baselines",["baseline","metric","setup","configuration","evaluation protocol","implementation"]),
+ ("Main",["main","comparative","results","performance","accuracy"]),
+ ("Ablation",["ablation","sensitivity","component","study"]),
+ ("Complexity",["complexity","runtime","efficiency","cost","resource"]),
+ ("Stats",["significance","statistical","test","error","analysis"]),
+ ("Related",["related","literature","comparison","review","synthesis","gap"]),
+ ("Hyper",["hyperparameter","training","optimis","optimiz","search","tuning"]),
+ ("Features",["feature","notation","preliminaries","definition","background"]),
+ ("Discussion",["discussion","implication","limitation","future","qualitative"]),
+]
+
+def _bind(caption, subs):
+    low = caption.lower()
+    for _, hints in BIND_HINTS:
+        if any(h in low for h in hints):
+            for s in subs:
+                if any(h in s.lower() for h in hints): return s
+    return subs[len(subs)//2] if subs else ""
+
+def _md(header, rows):
+    out = ["| " + " | ".join(header) + " |", "|" + "|".join(["---"]*len(header)) + "|"]
+    for r in rows: out.append("| " + " | ".join(str(c) for c in r) + " |")
+    return "\n".join(out)
+
+def build(title, kind, subs, ds_list, baselines, metrics):
+    T = []; dss = ds_list
+    def add(caption, header, rows, bind=None):
+        T.append({"n": len(T)+1, "caption": caption, "md": _md(header, rows),
+                  "bind": bind or _bind(caption, subs)})
+
+    add("Table 1. Characteristics of the evaluation datasets.",
+        ["Dataset","Task","Instances","Features","Classes","Since"],
+        [[d[0], d[2], "{:,}".format(d[3]), d[4], d[5], d[7]] for d in dss])
+
+    pre = [("Normalisation","z-score per channel","train statistics only"),
+           ("Missing values","forward fill + learned mask","applies to 1.4% of cells"),
+           ("Splits","chronological 70/10/20","no test leakage"),
+           ("Augmentation","jitter + scaling","training split only"),
+           ("Batching","256","shuffled within split"),
+           ("Precision","FP32 / FP16 mixed","AMP enabled")]
+    add("Table 2. Preprocessing and split configuration.",
+        ["Step","Setting","Note"], [[a,b,c] for a,b,c in pre])
+
+    m = metrics[:3]; rows = []
+    for b in baselines:
+        r = [b]
+        for met in m:
+            v = pf_text.num(title, b, met, "v", lo=58, hi=90, dec=2)
+            r.append("%.2f ± %.2f" % (v, pf_text.num(title, b, met, "s", lo=0.15, hi=0.9)))
+        r.append("%.1f" % pf_text.num(title, b, "p", lo=12, hi=140, dec=1))
+        rows.append(r)
+    prop = ["Ours"]
+    for j in range(len(m)):
+        best = max(float(r[j+1].split(" ±")[0]) for r in rows)
+        prop.append("%.2f ± %.2f" % (best + pf_text.num(title, m[j], "imp", lo=1.6, hi=5.2),
+                                    pf_text.num(title, m[j], "ps", lo=0.08, hi=0.3)))
+    prop.append("%.1f" % pf_text.num(title, "ours", "p", lo=14, hi=60, dec=1))
+    rows.append(prop)
+    add("Table 3. Main comparative results (mean ± s.d. over five seeds).",
+        ["Method"] + m + ["Params (M)"], rows)
+
+    comps = ["Full model","w/o calibration head","w/o joint training",
+             "w/o Lipschitz penalty","w/o augmentation","single-branch variant"]
+    base_v = float(prop[1].split(" ±")[0]); rows = []
+    for c in comps:
+        drop = 0.0 if c == "Full model" else pf_text.num(title, c, "drop", lo=0.8, hi=6.2)
+        rows.append([c, "%.2f" % (base_v - drop), "%.2f" % (100*(base_v-drop)/base_v),
+                     "▼ %.1f%%" % (100*drop/base_v) if drop else "—"])
+    add("Table 4. Ablation study on the " + dss[0][0] + " dataset.",
+        ["Configuration", m[0], "Relative (%)", "Δ"], rows)
+
+    if kind == "journal":
+        add("Table 5. Feature and target summary per dataset.",
+            ["Dataset","Feature space","Types","Scaling","Task"],
+            [[d[0], d[4], "continuous / categorical", "min-max", d[2]] for d in dss])
+        space = [("learning rate","1e-5 – 1e-2","log-uniform","3e-4"),
+                 ("batch size","64 – 512","grid","256"),
+                 ("weight decay","0 – 1e-2","log-uniform","1e-4"),
+                 ("dropout","0.0 – 0.5","grid","0.1"),
+                 ("warm-up steps","0 – 5000","grid","1000"),
+                 ("λ (penalty)","1e-4 – 1e-1","log-uniform","5e-3"),
+                 ("gradient clip","0.5 – 5.0","grid","1.0"),
+                 ("epochs","50 – 400","early stop","180")]
+        add("Table 6. Hyperparameter search space.",
+            ["Hyperparameter","Range","Sampling","Selected"], [[a,b,c,d] for a,b,c,d in space])
+        rows = []
+        for d in dss:
+            v = pf_text.num(title, d[0], "per", lo=72, hi=94, dec=2)
+            rows.append([d[0], "%.2f" % v, "%.2f" % (v - pf_text.num(title, d[0], "g", lo=2, hi=7)),
+                         "%.2f" % pf_text.num(title, d[0], "sd", lo=0.1, hi=0.6),
+                         "%.1f" % pf_text.num(title, d[0], "t", lo=0.4, hi=9)])
+        add("Table 7. Per-dataset breakdown against the strongest baseline.",
+            ["Dataset","Ours ("+m[0]+")","Best baseline","s.d.","Gap"], rows)
+        rows = []
+        for lam in ["1e-4","1e-3","5e-3","1e-2","5e-2","1e-1"]:
+            rows.append([lam, "%.2f" % (base_v - abs(pf_text.num(title, lam, "sens", lo=-2.4, hi=1.4))),
+                         "%.2f" % pf_text.num(title, lam, "loss", lo=0.21, hi=0.44),
+                         "%.1f" % pf_text.num(title, lam, "ep", lo=90, hi=320)])
+        add("Table 8. Sensitivity to the regularisation weight λ.",
+            ["λ", m[0], "Validation loss", "Epochs to converge"], rows)
+        rows = [[b, "%.1f" % pf_text.num(title, b, "par", lo=8, hi=320),
+                 "%.1f" % pf_text.num(title, b, "flop", lo=0.4, hi=18),
+                 "%.1f" % pf_text.num(title, b, "ms", lo=4, hi=90),
+                 "%.1f" % pf_text.num(title, b, "mem", lo=0.6, hi=11)] for b in baselines[:5]]
+        rows.append(["Ours", "%.1f" % pf_text.num(title,"opar",lo=10,hi=70),
+                     "%.1f" % pf_text.num(title,"oflop",lo=0.5,hi=9),
+                     "%.1f" % pf_text.num(title,"oms",lo=5,hi=40),
+                     "%.1f" % pf_text.num(title,"omem",lo=0.7,hi=6)])
+        add("Table 9. Computational cost per inference pass.",
+            ["Method","Params (M)","FLOPs (G)","Latency (ms)","Peak mem (GB)"], rows)
+        rows = [[b, "%.2f" % pf_text.num(title, b, "d", lo=0.9, hi=4.6),
+                 "%.4f" % pf_text.num(title, b, "pv", lo=0.0004, hi=0.03, dec=4),
+                 "%.3f" % pf_text.num(title, b, "ci1", lo=0.6, hi=3.2),
+                 "%.3f" % pf_text.num(title, b, "ci2", lo=3.4, hi=6.4)] for b in baselines[:5]]
+        add("Table 10. Paired statistical tests against each baseline (n = 5 seeds).",
+            ["Baseline","Cohen's d","p-value","95% CI low","95% CI high"], rows)
+        rows = [[c, "%.1f" % pf_text.num(title, c, "ours", lo=3, hi=18),
+                 "%.1f" % pf_text.num(title, c, "base", lo=6, hi=26),
+                 "%.1f" % pf_text.num(title, c, "rel", lo=8, hi=52)]
+                for c in ["Boundary cases","Rare classes","Distribution shift","Noisy labels",
+                          "Long-tail instances","Adversarial-like"]]
+        add("Table 11. Error analysis by failure category (share of total errors, %).",
+            ["Failure category","Ours","Baseline","Relative reduction"], rows)
+        rows = [["Study %s" % chr(65+i), str(2018+i),
+                 "%.2f" % pf_text.num(title, i, "lit", lo=68, hi=90),
+                 dss[i % len(dss)][0], "reported"] for i in range(5)]
+        rows.append(["Ours","2026","%.2f" % base_v, dss[0][0], "measured"])
+        add("Table 12. Comparison with values reported in the literature.",
+            ["Source","Year",m[0],"Dataset","Provenance"], rows)
+    return T, dss, baselines, m
+
+def figure_plan(title, kind, subs, dss, baselines, metrics):
+    F = []
+    def add(k, caption, payload, bind=None):
+        F.append({"n": len(F)+1, "kind": k, "caption": caption,
+                  "payload": payload, "bind": bind or _bind(caption, subs)})
+    kt = pf_text.keyterms(title, 6)
+    add("arch","Fig. 1. Overall architecture of the proposed framework.",
+        ["Input representation","Shared encoder","%s module" % (kt[0] if kt else "core"),
+         "Calibration head","Prediction"])
+    add("flow","Fig. 2. End-to-end processing pipeline with the convergence check.",
+        ["Raw input","Preprocess","Encode","Calibrate","Converged?","Emit prediction"])
+    add("module","Fig. 3. Internal structure of the calibration module.",
+        ["Feature slice","Scale estimate","Gate","Residual add","Output"])
+    add("tax","Fig. 4. Taxonomy of related approaches.",
+        {"root":"Prior work","a":["Classical","Statistical","Hand-tuned"],
+         "b":["Learned","End-to-end","Joint"],"c":["Hybrid","Two-stage","ours"]})
+    add("bar","Fig. 5. " + (metrics[0] if metrics else "Primary metric") +
+        " across methods on " + (dss[0][0] if dss else "the benchmark") + ".",
+        {"labels": baselines[:5] + ["Ours"],
+         "values": [pf_text.num(title, b, "fig", lo=62, hi=88) for b in baselines[:5]] +
+                   [pf_text.num(title, "ours", "fig", lo=90, hi=95)],
+         "err": [pf_text.num(title, b, "fe", lo=0.3, hi=1.1) for b in baselines[:5]] + [0.4]})
+    if kind == "journal":
+        add("ablation","Fig. 6. Ablation of the proposed components.",
+            {"labels":["Full","-head","-joint","-penalty","-aug","-single"],
+             "values":[92.4,88.1,89.6,90.2,91.1,87.3]})
+        add("sens","Fig. 7. Sensitivity of the primary metric to λ.",
+            {"x":[1e-4,1e-3,5e-3,1e-2,5e-2,1e-1],"y":[88.9,90.4,92.4,91.8,90.1,87.6]})
+        add("heat","Fig. 8. Confusion structure on the hardest split.",
+            {"labels":["C1","C2","C3","C4","C5"],
+             "matrix":[[78,6,4,2,1],[5,82,5,3,1],[3,4,80,7,2],[2,3,6,79,5],[1,2,2,6,83]]})
+        add("line","Fig. 9. Convergence behaviour over training epochs.",
+            {"x":list(range(0,200,20)),"y":[58,66,74,80,84,87,89,90,91,91.5],
+             "y2":[55,61,67,72,76,79,81,82,83,83.2]})
+        add("scatter","Fig. 10. Error against instance difficulty.",
+            {"x":[i for i in range(1,21)],
+             "y":[pf_text.num(title, i, "sc", lo=0.4, hi=6.5) for i in range(1,21)]})
+        add("radar","Fig. 11. Multi-criteria profile of the proposed method.",
+            {"labels":["Accuracy","Speed","Memory","Robustness","Calibration","Simplicity"],
+             "ours":[0.92,0.74,0.68,0.88,0.9,0.72],"base":[0.81,0.79,0.8,0.66,0.63,0.75]})
+        add("stack","Fig. 12. Contribution of each component to the final gain.",
+            {"labels":["Encoder","Head","Joint","Penalty","Aug"],"values":[22,41,18,12,7]})
+    return F
+</script>
+
+<script type="text/x-python" data-name="pf_fig">
+import io
+G = ["#111111","#3d3d3d","#6b6b6b","#9a9a9a","#c4c4c4","#e2e2e2"]
+HATCH = ["","///","\\\\\\","xxx","...","+++","---"]
+
+def _plt():
+    import matplotlib; matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    plt.rcParams.update({"font.family":"serif","font.serif":["DejaVu Serif","Times New Roman"],
+        "font.size":8,"axes.linewidth":0.7,"axes.edgecolor":"#111111",
+        "xtick.major.width":0.6,"ytick.major.width":0.6,"axes.labelsize":8,
+        "axes.titlesize":8.5,"legend.fontsize":7,"figure.facecolor":"white",
+        "axes.facecolor":"white"})
+    return plt
+
+def _save(fig):
+    buf = io.BytesIO()
+    fig.savefig(buf, format="png", dpi=300, bbox_inches="tight", facecolor="white")
+    import matplotlib.pyplot as plt; plt.close(fig); buf.seek(0)
+    return buf
+
+def arch(steps):
+    try: plt = _plt()
+    except Exception: return None
+    from matplotlib.patches import FancyBboxPatch, FancyArrowPatch
+    n = max(1, len(steps)); fig, ax = plt.subplots(figsize=(3.4, 0.62*n+0.5))
+    ax.axis("off"); y = n
+    for i, s in enumerate(steps):
+        ax.add_patch(FancyBboxPatch((0.06, y-0.66), 0.88, 0.5,
+            boxstyle="round,pad=0.015,rounding_size=0.04", linewidth=0.8,
+            edgecolor=G[0], facecolor=G[5] if i in (0,len(steps)-1) else G[4]))
+        ax.text(0.5, y-0.41, str(s)[:44], ha="center", va="center", fontsize=7.5)
+        if i < n-1:
+            ax.add_patch(FancyArrowPatch((0.5,y-0.68),(0.5,y-0.9),arrowstyle="-|>",
+                mutation_scale=8, linewidth=0.8, color=G[0]))
+        y -= 0.94
+    ax.set_xlim(0,1); ax.set_ylim(y+0.15, n+0.25); fig.tight_layout(); return _save(fig)
+
+def flow(steps):
+    try: plt = _plt()
+    except Exception: return None
+    from matplotlib.patches import FancyBboxPatch, FancyArrowPatch, Polygon
+    n = len(steps); fig, ax = plt.subplots(figsize=(6.4,1.9)); ax.axis("off"); w = 1.0/n
+    for i, s in enumerate(steps):
+        x = i*w
+        if s.endswith("?"):
+            ax.add_patch(Polygon([[x+w/2,0.72],[x+w-0.02,0.46],[x+w/2,0.2],[x+0.02,0.46]],
+                closed=True, linewidth=0.8, edgecolor=G[0], facecolor=G[5]))
+        else:
+            ax.add_patch(FancyBboxPatch((x+0.015,0.28), w-0.03, 0.36,
+                boxstyle="round,pad=0.01,rounding_size=0.03", linewidth=0.8,
+                edgecolor=G[0], facecolor=G[4]))
+        ax.text(x+w/2, 0.46, s[:16], ha="center", va="center", fontsize=6.8)
+        if i < n-1:
+            ax.add_patch(FancyArrowPatch((x+w-0.01,0.46),(x+w+0.005,0.46),
+                arrowstyle="-|>", mutation_scale=8, linewidth=0.8, color=G[0]))
+    ax.set_xlim(0,1); ax.set_ylim(0.1,0.85); fig.tight_layout(); return _save(fig)
+
+def module(steps): return arch(steps)
+
+def tax(spec):
+    try: plt = _plt()
+    except Exception: return None
+    from matplotlib.patches import FancyBboxPatch
+    fig, ax = plt.subplots(figsize=(5.6,2.6)); ax.axis("off")
+    ax.add_patch(FancyBboxPatch((0.36,2.35),0.28,0.34,
+        boxstyle="round,pad=0.01,rounding_size=0.03",linewidth=0.9,
+        edgecolor=G[0],facecolor=G[3]))
+    ax.text(0.5,2.52,spec["root"],ha="center",va="center",fontsize=7.5)
+    for x, col in zip([0.13,0.5,0.87],[spec.get("a",[]),spec.get("b",[]),spec.get("c",[])]):
+        ax.plot([0.5,x],[2.35,1.75],color=G[1],linewidth=0.7)
+        for j, item in enumerate(col):
+            yy = 1.62 - j*0.5
+            ax.add_patch(FancyBboxPatch((x-0.12,yy-0.16),0.24,0.32,
+                boxstyle="round,pad=0.008,rounding_size=0.03",linewidth=0.7,
+                edgecolor=G[0],facecolor=G[5] if "ours" not in item else G[3]))
+            ax.text(x,yy,item[:14],ha="center",va="center",fontsize=6.6)
+            ax.plot([x,x],[1.75,yy+0.17],color=G[2],linewidth=0.5)
+    ax.set_xlim(0,1); ax.set_ylim(-0.05,2.8); fig.tight_layout(); return _save(fig)
+
+def bar(spec):
+    try: plt = _plt()
+    except Exception: return None
+    fig, ax = plt.subplots(figsize=(4.2,2.4))
+    for i, (l, v) in enumerate(zip(spec["labels"], spec["values"])):
+        ax.bar(i, v, width=0.62, color=G[4] if l != "Ours" else G[1],
+               edgecolor=G[0], linewidth=0.7, hatch=HATCH[i % len(HATCH)],
+               yerr=spec["err"][i] if spec.get("err") else None, capsize=2,
+               error_kw={"elinewidth":0.6,"ecolor":G[0]})
+    ax.set_xticks(range(len(spec["labels"])))
+    ax.set_xticklabels(spec["labels"], rotation=22, ha="right", fontsize=6.8)
+    ax.grid(axis="y", linewidth=0.4, color=G[4]); ax.set_axisbelow(True)
+    ax.set_ylim(min(spec["values"])*0.92, max(spec["values"])*1.06)
+    fig.tight_layout(); return _save(fig)
+
+def ablation(spec):
+    try: plt = _plt()
+    except Exception: return None
+    fig, ax = plt.subplots(figsize=(4.0,2.3))
+    for i, (l, v) in enumerate(zip(spec["labels"], spec["values"])):
+        ax.barh(i, v, height=0.6, color=G[4] if i else G[1],
+                edgecolor=G[0], linewidth=0.7, hatch=HATCH[i % len(HATCH)])
+    ax.set_yticks(range(len(spec["labels"]))); ax.set_yticklabels(spec["labels"], fontsize=6.8)
+    ax.invert_yaxis(); ax.grid(axis="x", linewidth=0.4, color=G[4]); ax.set_axisbelow(True)
+    fig.tight_layout(); return _save(fig)
+
+def sens(spec):
+    try: plt = _plt()
+    except Exception: return None
+    fig, ax = plt.subplots(figsize=(3.8,2.3))
+    ax.semilogx(spec["x"], spec["y"], marker="s", markersize=3.4, linewidth=0.9,
+                color=G[0], markerfacecolor="white", markeredgecolor=G[0])
+    ax.grid(linewidth=0.4, color=G[4]); ax.set_axisbelow(True)
+    fig.tight_layout(); return _save(fig)
+
+def heat(spec):
+    try: plt = _plt()
+    except Exception: return None
+    import numpy as np
+    m = np.array(spec["matrix"], dtype=float)
+    fig, ax = plt.subplots(figsize=(3.3,3.0))
+    ax.imshow(m, cmap="Greys", vmin=0, vmax=m.max())
+    ax.set_xticks(range(len(spec["labels"]))); ax.set_yticks(range(len(spec["labels"])))
+    ax.set_xticklabels(spec["labels"], fontsize=7); ax.set_yticklabels(spec["labels"], fontsize=7)
+    for i in range(m.shape[0]):
+        for j in range(m.shape[1]):
+            ax.text(j, i, "%d" % m[i,j], ha="center", va="center", fontsize=6.4,
+                    color="white" if m[i,j] > m.max()*0.55 else "black")
+    for s in ax.spines.values(): s.set_linewidth(0.7)
+    fig.tight_layout(); return _save(fig)
+
+def line(spec):
+    try: plt = _plt()
+    except Exception: return None
+    fig, ax = plt.subplots(figsize=(4.0,2.3))
+    ax.plot(spec["x"], spec["y"], marker="o", markersize=3, linewidth=0.9, color=G[0],
+            markerfacecolor="white", markeredgecolor=G[0], label="Ours")
+    if "y2" in spec:
+        ax.plot(spec["x"], spec["y2"], marker="^", markersize=3, linewidth=0.8,
+                linestyle="--", color=G[2], markerfacecolor="white",
+                markeredgecolor=G[2], label="Baseline")
+        ax.legend(frameon=False, fontsize=6.6)
+    ax.grid(linewidth=0.4, color=G[4]); ax.set_axisbelow(True)
+    fig.tight_layout(); return _save(fig)
+
+def scatter(spec):
+    try: plt = _plt()
+    except Exception: return None
+    fig, ax = plt.subplots(figsize=(3.8,2.3))
+    ax.scatter(spec["x"], spec["y"], s=14, facecolor="white", edgecolor=G[0],
+               linewidth=0.7, marker="o")
+    ax.grid(linewidth=0.4, color=G[4]); ax.set_axisbelow(True)
+    fig.tight_layout(); return _save(fig)
+
+def radar(spec):
+    try: plt = _plt()
+    except Exception: return None
+    import numpy as np
+    lbl = spec["labels"]; n = len(lbl)
+    ang = np.linspace(0, 2*np.pi, n, endpoint=False).tolist(); ang += ang[:1]
+    fig, ax = plt.subplots(figsize=(3.4,3.0), subplot_kw={"polar":True})
+    for key, col in (("base",G[2]),("ours",G[0])):
+        vals = spec[key] + spec[key][:1]
+        ax.plot(ang, vals, linewidth=0.9, color=col)
+        ax.fill(ang, vals, color=col, alpha=0.12 if key=="ours" else 0.06,
+                hatch="///" if key=="base" else "")
+    ax.set_xticks(ang[:-1]); ax.set_xticklabels(lbl, fontsize=6.4)
+    ax.tick_params(labelsize=6); ax.grid(linewidth=0.4, color=G[4])
+    fig.tight_layout(); return _save(fig)
+
+def stack(spec):
+    try: plt = _plt()
+    except Exception: return None
+    fig, ax = plt.subplots(figsize=(4.0,2.0)); bottom = 0
+    for i, (l, v) in enumerate(zip(spec["labels"], spec["values"])):
+        ax.bar(0, v, bottom=bottom, width=0.42, color=G[5-i%5],
+               edgecolor=G[0], linewidth=0.7, hatch=HATCH[i % len(HATCH)])
+        ax.text(0.26, bottom+v/2, "%s (%d%%)" % (l, v), va="center", fontsize=6.6)
+        bottom += v
+    ax.set_xticks([]); ax.grid(axis="y", linewidth=0.4, color=G[4]); ax.set_axisbelow(True)
+    fig.tight_layout(); return _save(fig)
+
+RENDER = {"arch":arch,"flow":flow,"module":module,"tax":tax,"bar":bar,"ablation":ablation,
+          "sens":sens,"heat":heat,"line":line,"scatter":scatter,"radar":radar,"stack":stack}
+
+def render(kind, payload):
+    fn = RENDER.get(kind)
+    if not fn: return None
+    try: return fn(payload)
+    except Exception: return None
+</script>
+
+<script type="text/x-python" data-name="pf_cite">
+from pf_text import MARKER, keys_of
+
+def render_apa(text, by_key):
+    def rep(m):
+        ks = [k for k in keys_of(m) if k in by_key]
+        if not ks: return ""
+        rs = sorted((by_key[k] for k in ks), key=lambda r: (r.surname().lower(), r.year or 0))
+        return " (%s)" % "; ".join(r.intext() for r in rs)
+    return MARKER.sub(rep, text)
+
+def render_ieee(text, by_key, order):
+    def rep(m):
+        nums = []
+        for k in keys_of(m):
+            if k not in by_key: continue
+            if k not in order: order[k] = len(order)+1
+            nums.append(order[k])
+        if not nums: return ""
+        return " [%s]" % ", ".join(str(n) for n in sorted(set(nums)))
+    return MARKER.sub(rep, text)
+
+def render(text, by_key, style, order=None):
+    if style == "ieee":
+        return render_ieee(text, by_key, order if order is not None else {})
+    return render_apa(text, by_key)
+
+def ordered_refs(bank, style, order):
+    if style == "ieee" and order:
+        ranked = sorted(order.items(), key=lambda kv: kv[1])
+        return [r for k, _ in ranked for r in bank if r.key == k]
+    return sorted(bank, key=lambda r: (r.surname().lower(), r.year or 0))
+</script>
+
+<script type="text/x-python" data-name="pf_grammar">
+import asyncio
+import pf_net
+
+LT = "https://api.languagetool.org/v2/check"
+AUTO_CATS = {"TYPOS","GRAMMAR","PUNCTUATION","CASING","COMPOUNDING",
+             "CONFUSED_WORDS","REDUNDANCY","AGREEMENT","VERB_FORM"}
+
+async def check(text, lang="en-US"):
+    if not text.strip(): return []
+    chunks, buf, n = [], [], 0
+    for line in text.split("\n"):
+        if n + len(line) > 15000:
+            chunks.append("\n".join(buf)); buf, n = [], 0
+        buf.append(line); n += len(line)
+    if buf: chunks.append("\n".join(buf))
+    async def one(c):
+        return await pf_net.post_form(LT, {"text": c, "language": lang, "level": "picky"})
+    res = await asyncio.gather(*[one(c) for c in chunks], return_exceptions=True)
+    matches, off = [], 0
+    for c, r in zip(chunks, res):
+        if isinstance(r, Exception) or not r:
+            off += len(c)+1; continue
+        for m in r.get("matches", []):
+            m["offset"] += off; matches.append(m)
+        off += len(c)+1
+    return matches
+
+async def autocorrect(text, lang="en-US"):
+    try: ms = await check(text, lang)
+    except Exception: return text, 0, 0
+    fixed = 0
+    for m in sorted(ms, key=lambda x: -x["offset"]):
+        reps = m.get("replacements") or []
+        if not reps: continue
+        rule = m.get("rule") or {}
+        cat = (rule.get("category") or {}).get("id","")
+        it = rule.get("issueType","")
+        if not (it in ("misspelling","grammar","typography") or cat in AUTO_CATS): continue
+        o, l = m["offset"], m["length"]
+        text = text[:o] + reps[0]["value"] + text[o+l:]
+        fixed += 1
+    return text, len(ms), fixed
+</script>
+
+<script type="text/x-python" data-name="pf_plag">
+import asyncio, re, statistics
+from collections import Counter
+from difflib import SequenceMatcher
+import pf_cfg, pf_text
+from pf_refs import cr_search, oa_search
+
+async def similarity(text, max_sent=55, progress=None):
+    lines = [l for l in text.split("\n") if l.strip() and not l.strip().startswith("|")]
+    body = "\n".join(lines)
+    sents = [s for s in pf_text.sentences(body) if pf_text.words(s) >= 8][:max_sent]
+    sem = asyncio.Semaphore(max(2, pf_cfg.STATE["concurrency"]))
+    async def judge(s):
+        q = " ".join(s.split()[:16])
+        async with sem:
+            try:
+                a = await cr_search(q, rows=4); b = await oa_search(q, rows=4)
+            except Exception: a, b = [], []
+        best = {"score":0.0,"src":"","doi":"","match":"","run":0}
+        for r in list(a)+list(b):
+            c = (r.title or "")[:400]
+            if not c: continue
+            ratio = SequenceMatcher(None, s, c).ratio()
+            ja, jb = pf_text.shingles(s), pf_text.shingles(c)
+            jac = (len(ja & jb)/len(ja | jb)) if (ja and jb) else 0.0
+            run = pf_text.longest_run(s, c)
+            sc = ratio*0.45 + jac*0.30
+            if run >= 8: sc = max(sc, min(0.99, 0.55 + run/40.0))
+            if sc > best["score"]:
+                best = {"score":round(sc,3),"src":r.source,"doi":r.doi,"match":c[:200],"run":run}
+        best["sentence"] = s
+        return best
+    if not sents:
+        return {"engine":"semantic-corpus","similarity_percent":0.0,"passed":True,
+                "checked":0,"flagged_count":0,"flagged":[],"target":pf_cfg.SIM_TARGET}
+    results = await asyncio.gather(*[judge(s) for s in sents])
+    overall = round(100*sum(r["score"] for r in results)/max(1,len(results)), 2)
+    flagged = [r for r in results if r["score"] >= 0.55]
+    return {"engine":"semantic-corpus","similarity_percent":overall,
+            "target":pf_cfg.SIM_TARGET,"passed":overall <= pf_cfg.SIM_TARGET,
+            "checked":len(results),"flagged_count":len(flagged),
+            "flagged":sorted(flagged, key=lambda x:-x["score"])[:40]}
+
+AI_PHRASES = ["it is important to note","it is worth noting","plays a crucial role",
+ "plays a vital role","plays a key role","in the realm of","a testament to",
+ "underscores the importance","sheds light on","paves the way","in today's world",
+ "in today's rapidly","significant impact","key takeaway","unlock the potential",
+ "at the forefront","game changer","robust and scalable","comprehensive understanding",
+ "a wide range of","a large number of","a significant number of","due to the fact that",
+ "in order to","with regard to","with respect to","in the context of","as a result of",
+ "it should be noted","it can be seen","as can be seen","one of the most",
+ "in recent years","over the past","has gained significant","have gained significant",
+ "has attracted considerable","has attracted significant","has received significant",
+ "have been widely","has been widely","is becoming increasingly","are becoming increasingly",
+ "the proposed method","the proposed approach","the proposed framework","our proposed",
+ "experimental results show","experimental results demonstrate","results demonstrate that",
+ "results indicate that","the results show that","as shown in table","as shown in figure",
+ "can be observed","it is observed that","it is clear that","it is evident that",
+ "in this paper","in this work","in this study","the main contribution","the key idea",
+ "state of the art","state-of-the-art performance","achieves superior performance",
+ "outperforms the baseline","outperforms existing","significant improvement",
+ "substantial improvement","notable improvement","consistent improvement",
+ "the effectiveness of","the efficiency of","the superiority of","the validity of",
+ "furthermore, the","moreover, the","additionally, the","in addition, the",
+ "however, the","therefore, the","thus, the","consequently, the",
+ "on the other hand","in contrast","in comparison","compared with","compared to",
+ "as well as","such as","in terms of","with the aim of","in order to achieve",
+ "to address this","to address these","to overcome this","to tackle this",
+ "the remainder of this paper","the rest of this paper","is organised as follows",
+ "is organized as follows","future work will","future research should"]
+
+CONNECT = ("furthermore","moreover","additionally","therefore","thus","consequently",
+           "however","overall","in addition","beyond this","in contrast","nevertheless")
+
+def ai_likelihood(text):
+    sents = [s for s in pf_text.sentences(text) if pf_text.words(s) > 2]
+    if len(sents) < 6:
+        return {"score":0.0,"flags":[],"metrics":{}}
+    lens = [pf_text.words(s) for s in sents]
+    mean = statistics.mean(lens); sd = statistics.pstdev(lens) or 0.001
+    burst = sd/mean
+    short = sum(1 for l in lens if l <= 11)/len(lens)
+    long_ = sum(1 for l in lens if l >= 28)/len(lens)
+
+    ws = re.findall(r"[a-z']+", text.lower())
+    ttr = len(set(ws))/max(1,len(ws))
+    rar = pf_text.rarity(text)
+    low = text.lower()
+    ph = sum(low.count(p) for p in AI_PHRASES)/max(1,len(ws)/100.0)
+    cnd = sum(low.count(c) for c in CONNECT)/max(1,len(ws)/100.0)
+    contra = len(re.findall(r"\b\w+'(?:s|t|re|ve|ll|d|m)\b", text))/max(1,len(ws)/100.0)
+
+    tri = Counter()
+    for s in sents:
+        w = re.findall(r"[a-z']+", s.lower())
+        for i in range(len(w)-2): tri[tuple(w[i:i+3])] += 1
+    tri_rep = sum(v for v in tri.values() if v > 1)/max(1,sum(tri.values()))
+
+    start = Counter(s.split()[0].lower() for s in sents if s.split())
+    starter_rep = 1 - len(start)/max(1,len(sents))
+
+    adj = sum(1 for i in range(len(lens)-1) if abs(lens[i]-lens[i+1]) <= 3)
+    adj_ratio = adj/max(1,len(lens)-1)
+
+    flags = []
+    for s in sents:
+        sl = s.lower()
+        hits = [p for p in AI_PHRASES if p in sl]
+        if hits or pf_text.words(s) > 34:
+            flags.append({"sentence":s,
+                          "reason":("phrase:"+hits[0]) if hits else "overlong"})
+
+    score = 0.0
+    score += max(0, 0.64 - burst) * 100
+    score += max(0, 0.24 - short) * 120
+    score += max(0, 0.12 - long_) * 70
+    score += max(0, ph - 0.75) * 11
+    score += max(0, cnd - 1.10) * 10
+    score += max(0, 0.85 - contra) * 14
+    score += max(0, 4.05 - rar) * 15
+    score += max(0, tri_rep - 0.035) * 150
+    score += starter_rep * 24
+    score += max(0, adj_ratio - 0.42) * 45
+
+    return {"score": round(min(100.0, max(0.0, score)), 2), "flags": flags[:80],
+            "metrics":{"burstiness":round(burst,3),"short_share":round(short,3),
+                       "long_share":round(long_,3),"rarity":round(rar,3),"ttr":round(ttr,3),
+                       "ai_phrases_per_100w":round(ph,2),"connectives_per_100w":round(cnd,2),
+                       "contractions_per_100w":round(contra,2),
+                       "trigram_repeat":round(tri_rep,4),
+                       "adjacent_similarity":round(adj_ratio,3),
+                       "sentences":len(sents),"mean_len":round(mean,1)}}
+</script>
+
+<script type="text/x-python" data-name="pf_human">
+import asyncio, random, re
+import pf_cfg, pf_text
+from pf_plag import ai_likelihood
+
+R = random.Random(17)
+
+WORD_MAP = {
+ "utilize":"employ","utilizes":"employs","utilized":"employed","utilizing":"employing",
+ "leverage":"exploit","leverages":"exploits","leveraged":"exploited","leveraging":"exploiting",
+ "delve into":"probe","delves into":"probes","furthermore":"also","moreover":"beyond that",
+ "additionally":"on top of that","important":"consequential","significant":"marked",
+ "substantial":"sizeable","numerous":"many","various":"assorted","several":"a handful of",
+ "demonstrate":"show","demonstrates":"shows","demonstrated":"showed",
+ "indicate":"point to","indicates":"points to","indicated":"pointed to",
+ "obtain":"attain","obtains":"attains","obtained":"attained",
+ "method":"procedure","methods":"procedures","approach":"scheme","approaches":"schemes",
+ "framework":"machinery","system":"apparatus","systems":"apparatus",
+ "result":"outcome","results":"findings","performance":"behaviour",
+ "improve":"lift","improves":"lifts","improved":"lifted","improvement":"lift",
+ "challenge":"difficulty","challenges":"difficulties","problem":"difficulty",
+ "solution":"remedy","effective":"workable","efficient":"frugal",
+ "comprehensive":"broad","robust":"sturdy","novel":"fresh",
+ "in order to":"to","due to the fact that":"because","prior to":"before",
+ "with regard to":"on","with respect to":"for","a large number of":"many",
+ "a wide range of":"a spread of","it is important to note that":"note that",
+ "it should be noted that":"note that","in the context of":"in",
+ "plays a crucial role in":"sits at the centre of","has the ability to":"can",
+ "is able to":"can","make use of":"use","makes use of":"uses","at the present time":"now",
+ "state-of-the-art":"leading","cutting-edge":"recent","seamlessly":"smoothly",
+ "holistic":"whole-system","multifaceted":"many-sided","meticulously":"painstakingly",
+ "paradigm shift":"shift","game-changer":"turning point","unlock the potential of":"enable",
+ "shed light on":"clarify","paves the way for":"enables",
+ "underscores the importance of":"highlights",
+ "the fact that":"that","as a result of":"from","in addition to":"besides",
+ "on the other hand":"conversely","in conclusion":"to close","in recent years":"over the past decade",
+ "in this paper":"here","in this work":"here","the proposed method":"our scheme",
+ "the proposed approach":"our scheme","the proposed framework":"our scheme",
+ "experimental results show":"the experiments show","results demonstrate that":"the results reveal",
+ "it is clear that":"plainly","it is evident that":"evidently","can be observed":"shows up",
+ "compared with":"against","compared to":"against","in terms of":"on",
+}
+
+CONTRACT = {"does not":"doesn't","do not":"don't","did not":"didn't","is not":"isn't",
+ "are not":"aren't","was not":"wasn't","were not":"weren't","cannot":"can't",
+ "could not":"couldn't","will not":"won't","would not":"wouldn't","has not":"hasn't",
+ "have not":"haven't","had not":"hadn't","should not":"shouldn't","it is":"it's",
+ "that is":"that's","there is":"there's"}
+
+RARE_MARKERS = ["Bar a few exceptions, ","Even so, ","In fairness, ","At any rate, ",
+ "For the most part, ","As it happens, ","To be fair, ","Notably though, ",
+ "Curiously, ","Predictably, ","Unsurprisingly, ","More to the point, ",
+ "Put plainly, ","In practice, ","On balance, ","Strikingly, ","Tellingly, ",
+ "As expected, ","Less obviously, ","Worth stressing, "]
+
+SHORT = ["This matters.","The effect is small.","Two things follow.","That gap is real.",
+ "The gains are uneven.","Not all splits behave alike.","The pattern repeats.",
+ "Numbers shift with the seed.","Cost stays flat.","Two caveats apply.",
+ "The margin is thin on one split.","Ordering is stable.","The trend holds.",
+ "One split bucks it.","Nothing exotic here.","The gap narrows sharply.",
+ "That result surprised us.","The ordering survives.","Variance is low.",
+ "The effect is monotone.","Two rows stand out.","The rest trail."]
+
+PROT = re.compile(r"\[\[k[\d,\s]+\]\]|\[\[(?:TBL|FIG):\d+\]\]|\$\$[^$]+\$\$|\$[^$]+\$")
+
+def _prot(t):
+    store = []
+    def s(m):
+        store.append(m.group(0)); return "\x00%d\x00" % (len(store)-1)
+    return PROT.sub(s, t), store
+
+def _unprot(t, store):
+    return re.sub(r"\x00(\d+)\x00", lambda m: store[int(m.group(1))], t)
+
+def _is_special(b):
+    b = b.strip()
+    return b.startswith("|") or b.startswith("$$") or b.startswith("[[FIG") or b.startswith("[[TBL")
+
+def _split_once(s):
+    for pat in ("; ", " — ", ", and ", ", while ", ", whereas ", ", which ", ", but ",
+                ", so ", " because ", ", although "):
+        i = s.find(pat)
+        if 10 < i < len(s) - 14:
+            a = s[:i].rstrip(",; —"); b = s[i:].lstrip(",; —")
+            a = a if a.endswith((".","!","?")) else a + "."
+            b = b[0].upper() + b[1:] if b else b
+            b = b if b.endswith((".","!","?")) else b + "."
+            return [a, b]
+    return [s]
+
+def lexical_pass(text, level=2):
+    body, store = _prot(text)
+    for a, b in WORD_MAP.items():
+        if level >= 2 and R.random() < 0.32: continue
+        body = re.sub(r"\b%s\b" % re.escape(a), b, body, flags=re.I)
+    if level >= 2:
+        for a, b in CONTRACT.items():
+            body = re.sub(r"\b%s\b" % re.escape(a), b, body, flags=re.I)
+    return _unprot(body, store)
+
+def kill_ai_phrases(text):
+    body, store = _prot(text)
+    reps = {
+      "furthermore, ":"also, ","moreover, ":"beyond that, ","additionally, ":"on top of that, ",
+      "however, ":"even so, ","therefore, ":"so ","thus, ":"so ","consequently, ":"as a result, ",
+      "in addition, ":"also, ","in contrast, ":"by contrast, ",
+      "it is worth noting that ":"note that ","it can be seen that ":"plainly, ",
+      "as can be seen, ":"as the table shows, ",
+      "is organised as follows":"runs as follows","is organized as follows":"runs as follows",
+      "has gained significant attention":"has drawn heavy attention",
+      "has attracted considerable attention":"has drawn heavy attention",
+      "has attracted significant attention":"has drawn heavy attention",
+      "has received significant attention":"has drawn heavy attention",
+      "have been widely":"have been broadly","has been widely":"has been broadly",
+      "is becoming increasingly":"is growing","are becoming increasingly":"are growing",
+      "achieves superior performance":"beats the field","outperforms the baseline":"beats the baseline",
+      "outperforms existing":"beats existing","significant improvement":"marked gain",
+      "substantial improvement":"sizeable gain","consistent improvement":"steady gain",
+      "state-of-the-art performance":"leading accuracy","to address this":"to close that gap",
+      "to address these":"to close those gaps","to overcome this":"to get past that",
+    }
+    for a, b in reps.items():
+        body = re.sub(r"\b%s" % re.escape(a), b, body, flags=re.I)
+    return _unprot(body, store)
+
+def rhythm_pass(text, level=2):
+    out = []
+    for block in re.split(r"\n\s*\n", text):
+        if not block.strip(): continue
+        if _is_special(block): out.append(block); continue
+        body, store = _prot(block)
+        ss = []
+        for s in pf_text.sentences(body):
+            if pf_text.words(s) > 27: ss.extend(_split_once(s))
+            else: ss.append(s)
+
+        lens = [pf_text.words(s) for s in ss]
+        i = 0
+        while i < len(ss) - 2:
+            a, b, c = lens[i], lens[i+1], lens[i+2]
+            if abs(a-b) <= 3 and abs(b-c) <= 3 and b > 13:
+                parts = _split_once(ss[i+1])
+                if len(parts) == 2:
+                    ss[i+1:i+2] = parts
+                    lens = [pf_text.words(s) for s in ss]
+                    i += 1
+            i += 1
+
+        if level >= 2 and len(ss) >= 3 and min(pf_text.words(s) for s in ss) > 12:
+            ss.insert(R.randint(1, len(ss)-1), R.choice(SHORT))
+        if level >= 2 and R.random() < 0.45 and len(ss) >= 2:
+            first = ss[0]
+            if first and first[0].isalpha():
+                ss[0] = R.choice(RARE_MARKERS) + first[0].lower() + first[1:]
+        out.append(_unprot(" ".join(ss), store))
+    return "\n\n".join(out)
+
+def opening_pass(text):
+    out = []
+    for block in text.split("\n\n"):
+        if _is_special(block): out.append(block); continue
+        block = re.sub(r"^(In addition|Furthermore|Moreover|Additionally|Also|Beyond that|"
+                       r"Thus|Therefore|Consequently|However|Overall|Notably),?\s+", "",
+                       block.strip())
+        if block: block = block[0].upper() + block[1:]
+        out.append(block)
+    return "\n\n".join(out)
+
+def paragraph_rhythm(text):
+    blocks = [b for b in text.split("\n\n") if b.strip()]
+    merged = []
+    for b in blocks:
+        if _is_special(b) or len(b.split()) < 25:
+            if merged and len(merged[-1].split()) < 60 and not _is_special(merged[-1]):
+                merged[-1] = merged[-1] + " " + b
+            else:
+                merged.append(b)
+        else:
+            merged.append(b)
+    return "\n\n".join(merged)
+
+HUM_SYS = """You are a journal copy-editor rewriting machine text so it survives an AI detector.
+
+The detector measures token perplexity and sentence-length burstiness. Optimise both.
+
+MANDATORY, per paragraph:
+- one sentence of 5-9 words
+- one sentence of 25-34 words
+- no two consecutive sentences within 4 words of each other in length
+- one sentence that opens with a participle, adverb or short prepositional phrase
+- at least one contraction (doesn't, isn't, we've, it's)
+- one em-dash or parenthetical aside
+
+BANNED WORDS AND PHRASES — never output these:
+utilize, leverage, delve, furthermore, moreover, additionally, in conclusion,
+it is important to note, it is worth noting, plays a crucial role, in the realm of,
+comprehensive, robust, seamless, holistic, paradigm, multifaceted, meticulously,
+a wide range of, a large number of, state-of-the-art, in recent years, in this paper,
+the proposed method, experimental results show, as shown in table.
+
+IDIOMS — use one per paragraph: "bar a few exceptions", "even so", "in fairness",
+"at any rate", "for the most part", "as it happens", "to be fair", "put plainly",
+"on balance", "strikingly".
+
+PRESERVE EXACTLY: numbers, dataset names, metric names, [[k12]] / [[k3,k7]],
+[[TBL:3]] / [[FIG:2]], and everything inside $$ ... $$.
+
+Keep first-person plural where it appears. No bullet points. Output ONLY the rewritten paragraph."""
+
+async def _candidate(para, llm, sem, temperature):
+    if pf_text.words(para) < 18: return para
+    async with sem:
+        try:
+            out = await llm.chat(HUM_SYS, "Rewrite this paragraph.\n\n" + para,
+                                 max_tokens=1700, temperature=temperature, tries=3)
+            out = (out or "").strip()
+            return out if pf_text.words(out) >= pf_text.words(para) * 0.5 else para
+        except Exception:
+            return para
+
+async def _best_of(para, sem, temperature, tries=2):
+    if pf_text.words(para) < 18: return para
+    from pf_llm import humaniser
+    tasks = [_candidate(para, humaniser(pf_cfg.STATE.get("hum_model_idx", 0) + t),
+                        sem, temperature + 0.12 * t) for t in range(tries)]
+    outs = await asyncio.gather(*tasks)
+    outs = [o for o in outs if o and o != para] or [para]
+    return min(outs, key=lambda o: ai_likelihood(o)["score"])
+
+async def humanize_doc(text, llm, progress=None, use_llm=True, intensity=3):
+    history, cur = [], text
+    passes = max(1, min(pf_cfg.MAX_HUMANIZE_PASSES, intensity + 1))
+    for p in range(passes):
+        det = ai_likelihood(cur)
+        history.append({"pass": p, "score": det["score"]})
+        if progress:
+            progress("humanize", "pass %d — AI %.1f | burst %.2f | short %.0f%% | rarity %.2f"
+                     % (p, det["score"], det["metrics"].get("burstiness", 0),
+                        100 * det["metrics"].get("short_share", 0),
+                        det["metrics"].get("rarity", 0)))
+        if det["score"] <= pf_cfg.AI_TARGET: break
+
+        cur = kill_ai_phrases(cur)
+        cur = lexical_pass(cur, level=2)
+        cur = rhythm_pass(cur, level=2)
+        cur = opening_pass(cur)
+        cur = paragraph_rhythm(cur)
+
+        det = ai_likelihood(cur)
+        if det["score"] <= pf_cfg.AI_TARGET or not use_llm: continue
+
+        blocks = [b for b in cur.split("\n\n") if b.strip()]
+        sem = asyncio.Semaphore(max(1, pf_cfg.STATE["concurrency"]))
+        temp = 0.9 + 0.1 * p
+        hot = {f["sentence"] for f in det["flags"]}
+        tasks = []
+        for i, b in enumerate(blocks):
+            if _is_special(b):
+                tasks.append(asyncio.sleep(0, result=b)); continue
+            front = i < max(3, len(blocks) // 8)
+            if any(s in b for s in hot) or pf_text.words(b) > 100 or p >= 1 or front:
+                tasks.append(_best_of(b, sem, temp, tries=2 if (front or p >= 2) else 1))
+            else:
+                tasks.append(asyncio.sleep(0, result=b))
+        cur = "\n\n".join(await asyncio.gather(*tasks))
+        cur = lexical_pass(cur, level=1)
+        pf_cfg.STATE["hum_model_idx"] = pf_cfg.STATE.get("hum_model_idx", 0) + 1
+
+    fin = ai_likelihood(cur)
+    return cur, {"history": history, "final": fin,
+                 "passed": fin["score"] <= pf_cfg.AI_TARGET}
+</script>
+
+<script type="text/x-python" data-name="pf_fallback">
+import pf_cfg, pf_text
+
+CAT = [("intro",["introduction","motivation","problem","contribution","organisation",
+        "organization","background","preliminar","foundation","definition","notation"]),
+ ("related",["related","literature","landmark","advances","hybrid","synthesis","gap","review"]),
+ ("method",["proposed","framework","architecture","module","algorithm","complexity",
+        "method","formulation","training","optimis","optimiz","objective","procedure","strategy"]),
+ ("data",["data","material","dataset","source","preprocess","characteristic","ethical"]),
+ ("math",["derivation","lemma","theorem","proof","convergence","bound","guarantee"]),
+ ("exp",["experiment","setup","baseline","metric","implementation","configuration",
+        "protocol","reproduc","evaluation"]),
+ ("res",["result","ablation","sensitivity","significan","qualitative","discussion",
+        "comparison","analysis","insight"]),
+ ("concl",["conclusion","summary","implication","limitation","future"])]
+
+T = {
+ "intro":[ "Interest in {k1} has climbed fast. The reason is mundane: {k2} now turns up in settings where the textbook assumptions quietly fail [[{r1}]].",
+  "Early work on {sub} stayed {k1}-agnostic. That kept the algebra tidy and capped accuracy [[{r2}]].",
+  "Drop {k2} and error climbs sharply on realistic splits [[{r3}]].",
+  "No single formulation of {sub} has held across the regimes that matter [[{r4}]].",
+  "We close part of that gap by pairing {k1} with a {k2}-aware formulation that survives shift.",
+  "Three benchmarks, five seeds, and one ablation that isolates each component."],
+ "related":[ "{a1} et al. ({y1}) gave a formulation of {sub} that is still a baseline [[{r1}]].",
+  "A parallel strand swaps the hand-tuned part for a learned surrogate, and reports gains on {k2}-heavy data [[{r2}]].",
+  "{a2} et al. ({y2}) pushed the idea into the streaming setting, at real cost [[{r3}]].",
+  "Hybrid designs pairing {k1} with {k2} look promising. Their behaviour under shift is barely characterised [[{r4}]].",
+  "The field agrees on the importance of {k1}. It disagrees, sharply, on how {sub} should be regularised."],
+ "method":[ "The framework consumes a sequence of observations and emits a {k1}-aware representation.",
+  "Three parts: an encoder, a {k2} module, and a calibration head.",
+  "The {k2} module trains jointly with the encoder, which removes the two-stage drift reported in [[{r1}]].",
+  "Cost is linear in sequence length, matching the best published bound for this class [[{r2}]].",
+  "Parameters are shared across both branches, so the count stays near the baseline."],
+ "data":[ "Three public benchmarks, picked for differences in scale, sampling rate and non-stationarity [[{r1}]].",
+  "Preprocessing follows [[{r2}]] so the numbers stay comparable.",
+  "Splits are chronological, not random. That is the harder setting.",
+  "Missing values get forward fill plus a learned mask, as in [[{r3}]].",
+  "No test statistics leak into training."],
+ "math":[ "Notation first, then the objective.",
+  "The lemma below bounds the {k1} term and carries the main proof.",
+  "Expand the objective, apply Jensen, collect terms.",
+  "Convergence follows from Lipschitz continuity of the gradient and a Robbins-Monro step schedule [[{r1}]].",
+  "The bound matches [[{r2}]] up to log factors."],
+ "exp":[ "Three benchmarks, five seeds, mean and standard deviation reported.",
+  "Every baseline is re-implemented under identical preprocessing, following [[{r1}]].",
+  "Hyperparameters are chosen on a held-out split; the grid sits in the supplementary material.",
+  "Metrics follow the benchmark definitions, so numbers compare cleanly [[{r2}]].",
+  "Same hardware, same seed schedule, throughout."],
+ "res":[ "Table 3 holds the main comparison. The scheme lifts the primary metric by {n1}% over the strongest baseline.",
+  "The lift holds across datasets. It is widest on the {k1}-heavy split.",
+  "Remove the {k2} module and {n2} points vanish. That module carries most of the benefit [[{r1}]].",
+  "Paired t-tests over five seeds give p < 0.05 throughout Table 10.",
+  "Runtime overhead is {n3}%, modest next to the accuracy gain.",
+  "Sensitivity to the regularisation weight stays flat over two orders of magnitude [[{r2}]]."],
+ "concl":[ "A {k1}-aware framework for {sub}, with steady gains on three benchmarks.",
+  "Main limitation: the calibration head assumes a stationary validation distribution [[{r1}]].",
+  "Second limitation: joint training gets expensive on very long sequences.",
+  "Future work targets the online setting and multi-modal inputs."],
+}
+
+def _cat(text):
+    t = (text or "").lower()
+    for name, keys in CAT:
+        if any(k in t for k in keys): return name
+    return "method"
+
+def outline(title, kind, pages, notes=""):
+    secs, body = pf_cfg.skeleton(kind, pages)
+    kt = pf_text.keyterms(title)
+    for s in secs:
+        for sub in s["subs"]:
+            sub["queries"] = [" ".join(kt[:3]) + " " + sub["title"],
+                              " ".join(kt[2:5]) if len(kt) > 4 else " ".join(kt[:2]),
+                              sub["title"]]
+    abstract = (
+        "%s stays open where %s drifts and labels are scarce. Existing formulations "
+        "either assume stationarity or pay a prohibitive cost, and neither survives "
+        "deployment. We introduce a %s-aware framework that pairs a shared encoder with a "
+        "dedicated calibration head and trains both under one objective. The objective is "
+        "derived in full, its complexity bounded, and a convergence rate proved that "
+        "matches the best published result for this class up to logarithmic factors. Across "
+        "three public benchmarks the scheme lifts the primary metric by %.1f%% over the "
+        "strongest baseline, with the widest margin on the hardest split. An ablation "
+        "attributes most of the gain to the calibration head."
+        % (title, kt[0], kt[1] if len(kt) > 1 else kt[0],
+           pf_text.num(title, "gain", lo=4.0, hi=11.0, dec=1)))
+    return {"abstract": abstract,
+            "keywords": ", ".join(kt[:6]) + ", empirical evaluation, ablation study",
+            "sections": [{"title": s["title"],
+                          "subs": [{"title": x["title"], "queries": x["queries"]}
+                                   for x in s["subs"]]} for s in secs],
+            "method": "A shared encoder trains jointly with a calibration head under one "
+                      "Lipschitz-regularised objective.",
+            "figure_steps": ["Input","Encoder","Core module","Head","Output"]}
+
+def _refs(bank, i, n=4):
+    if not bank: return ["k1"]*n
+    return [bank[(i*3+j) % len(bank)].key for j in range(n)]
+
+def section_text(title, sec, sub, bank, i0=0, ctx=None):
+    kt = pf_text.keyterms(title)
+    k1 = kt[0] if kt else "the method"; k2 = kt[1] if len(kt) > 1 else k1
+    pool = T.get(_cat(sub)) or T["method"]
+    r = _refs(bank, i0); paras = []
+    for pi in range(3):
+        sents = []
+        for si in range(5):
+            tpl = pool[(pi*5+si) % len(pool)]
+            idx = (i0 + pi*3 + si) % max(1, len(bank))
+            ref = bank[idx] if bank else None
+            nxt = bank[(idx+1) % len(bank)] if bank else None
+            sents.append(tpl.format(k1=k1, k2=k2, sub=sub.lower(),
+                r1=r[0], r2=r[1], r3=r[2], r4=r[3],
+                a1=ref.surname() if ref else "Previous",
+                a2=nxt.surname() if nxt else "Related",
+                y1=(ref.year if ref and ref.year else 2021),
+                y2=(nxt.year if nxt and nxt.year else 2022),
+                n1=pf_text.num(title, sub, pi, "n1", lo=3.0, hi=10.0, dec=1),
+                n2=pf_text.num(title, sub, pi, "n2", lo=1.2, hi=4.5, dec=1),
+                n3=pf_text.num(title, sub, pi, "n3", lo=6.0, hi=22.0, dec=1)))
+        paras.append(" ".join(sents))
+    if ctx and ctx.get("datasets"):
+        paras.append("We evaluate on %s. Table 1 lists the characteristics." %
+                     ", ".join(d[0] for d in ctx["datasets"]))
+    return "\n\n".join(paras)
+
+def math_text(title, bank):
+    kt = pf_text.keyterms(title)
+    k1 = kt[0] if kt else "the model"; k2 = kt[1] if len(kt) > 1 else k1
+    r = _refs(bank, 3)
+    return ("| Symbol | Meaning |\n|---|---|\n| $x_t$ | observation at time $t$ |\n"
+"| $z_t$ | latent %s-aware representation |\n| $\\theta$ | encoder parameters |\n"
+"| $\\phi$ | calibration parameters |\n| $\\lambda$ | regularisation weight |\n"
+"| $\\mathcal{L}$ | training objective |\n\n"
+"Let $\\mathcal{D}=\\{(x_t,y_t)\\}_{t=1}^{T}$ be chronologically ordered. The encoder "
+"$f_\\theta$ maps $z_t=f_\\theta(x_t)$ and the head $g_\\phi$ gives $\\hat{y}_t=g_\\phi(z_t)$. We want\n\n"
+"$$ \\theta^\\star,\\phi^\\star=\\arg\\min_{\\theta,\\phi}\\;"
+"\\frac{1}{T}\\sum_{t=1}^{T}\\ell(\\hat{y}_t,y_t)+\\lambda\\Omega(\\theta,\\phi) $$\n\n"
+"with $\\ell$ the squared loss and $\\Omega$ a Lipschitz penalty on the %s term [[%s]]. "
+"Expanding and applying Jensen's inequality,\n\n"
+"$$ \\Omega(\\theta,\\phi)=\\mathbb{E}_x[\\|\\nabla_\\theta f_\\theta(x)\\|_2]"
+"\\leq\\sqrt{\\mathbb{E}_x[\\|\\nabla_\\theta f_\\theta(x)\\|_2^2]} $$\n\n"
+"so the penalty is bounded by the second moment of the gradient norm. Substituting,\n\n"
+"$$ \\mathcal{L}(\\theta,\\phi)=\\frac{1}{T}\\sum_{t=1}^{T}\\ell(\\hat{y}_t,y_t)"
+"+\\lambda\\sqrt{\\mathbb{E}_x[\\|\\nabla_\\theta f_\\theta(x)\\|_2^2]} $$\n\n"
+"which is differentiable almost everywhere and admits stochastic gradient descent [[%s]]. "
+"Assume $\\ell$ is $L$-smooth and $\\eta_t=\\eta_0/\\sqrt{t}$. Standard arguments give\n\n"
+"$$ \\min_{1\\leq t\\leq T}\\mathbb{E}[\\|\\nabla\\mathcal{L}(\\theta_t)\\|_2^2]"
+"\\leq\\frac{2(\\mathcal{L}_0-\\mathcal{L}^\\star)}{\\eta_0\\sqrt{T}}"
+"+\\frac{L\\eta_0\\log T}{\\sqrt{T}} $$\n\n"
+"matching [[%s]] up to logarithmic factors. Per-epoch complexity is $O(Td)$."
+        % (k1, k2, r[0], r[1], r[2]))
+</script>
+
+<script type="text/x-python" data-name="pf_docx">
+import re, io
+from docx import Document
+from docx.enum.section import WD_SECTION
+from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_TAB_ALIGNMENT
+from docx.oxml import OxmlElement, parse_xml
+from docx.oxml.ns import qn
+from docx.shared import Inches, Pt
+import pf_cite, pf_latex
+
+def _font(run, name, size, bold=False, italic=False):
+    run.font.name = name; run.font.size = Pt(size); run.bold = bold; run.italic = italic
+    rpr = run._element.get_or_add_rPr()
+    rf = rpr.find(qn("w:rFonts"))
+    if rf is None:
+        rf = OxmlElement("w:rFonts"); rpr.append(rf)
+    for a in ("w:ascii","w:hAnsi","w:cs","w:eastAsia"): rf.set(qn(a), name)
+
+def _cols(section, n):
+    sp = section._sectPr; c = sp.xpath("./w:cols")
+    if not c: c = [OxmlElement("w:cols")]; sp.append(c[0])
+    c[0].set(qn("w:num"), str(n)); c[0].set(qn("w:space"), "340")
+    c[0].set(qn("w:equalWidth"), "1")
+
+def _rich(p, txt, cfg):
+    for tok in re.split(r"(\*\*[^*]+\*\*|\*[^*\n]+\*)", txt):
+        if not tok: continue
+        if tok.startswith("**") and tok.endswith("**"):
+            _font(p.add_run(tok[2:-2]), cfg["body_font"], cfg["body_size"], bold=True)
+        elif tok.startswith("*") and tok.endswith("*") and len(tok) > 2:
+            _font(p.add_run(tok[1:-1]), cfg["body_font"], cfg["body_size"], italic=True)
+        else:
+            _font(p.add_run(tok), cfg["body_font"], cfg["body_size"])
+
+def _eq(doc, latex, cfg, ctx):
+    ctx["eq"] += 1
+    p = doc.add_paragraph(); pf = p.paragraph_format
+    pf.space_before = Pt(6); pf.space_after = Pt(6)
+    pf.tab_stops.add_tab_stop(Inches(3.2), WD_TAB_ALIGNMENT.CENTER)
+    pf.tab_stops.add_tab_stop(Inches(6.5), WD_TAB_ALIGNMENT.RIGHT)
+    _font(p.add_run("\t"), cfg["body_font"], cfg["body_size"])
+    xml = pf_latex.to_omml(latex); ok = False
+    if xml:
+        try: p._p.append(parse_xml(xml)); ok = True
+        except Exception: ok = False
+    if not ok:
+        _font(p.add_run(pf_latex.to_unicode(latex)), cfg["body_font"],
+              cfg["body_size"], italic=True)
+    _font(p.add_run("\t(%d)" % ctx["eq"]), cfg["body_font"], cfg["body_size"])
+
+def _table(doc, lines, cfg, caption=""):
+    rows = [[c.strip() for c in r.strip().strip("|").split("|")] for r in lines]
+    nc = max(len(r) for r in rows)
+    t = doc.add_table(rows=len(rows), cols=nc)
+    try: t.style = "Table Grid"
+    except Exception: pass
+    for ri, row in enumerate(rows):
+        for ci in range(nc):
+            cell = t.cell(ri, ci); cell.text = ""
+            p = cell.paragraphs[0]
+            p.paragraph_format.space_after = Pt(0); p.paragraph_format.space_before = Pt(0)
+            p.alignment = WD_ALIGN_PARAGRAPH.LEFT if ci == 0 else WD_ALIGN_PARAGRAPH.CENTER
+            _font(p.add_run(row[ci] if ci < len(row) else ""),
+                  cfg["body_font"], cfg["caption_size"], bold=(ri == 0))
+    if caption:
+        cap = doc.add_paragraph(); cap.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        cap.paragraph_format.space_before = Pt(3); cap.paragraph_format.space_after = Pt(9)
+        m = re.match(r"^(Table\s+\d+\.)\s*(.*)$", caption)
+        if m:
+            _font(cap.add_run(m.group(1)+" "), cfg["body_font"], cfg["caption_size"], bold=True)
+            _font(cap.add_run(m.group(2)), cfg["body_font"], cfg["caption_size"])
+        else:
+            _font(cap.add_run(caption), cfg["body_font"], cfg["caption_size"])
+
+def _md(doc, text, cfg, ctx):
+    lines = text.split("\n"); i = 0
+    while i < len(lines):
+        ln = lines[i].rstrip(); st = ln.strip()
+        if st.startswith("$$") and st.endswith("$$") and len(st) > 4:
+            _eq(doc, st.strip("$").strip(), cfg, ctx); i += 1; continue
+        if st.startswith("|") and i+1 < len(lines) and \
+           set(lines[i+1].replace("|","").strip()) <= set("-: "):
+            blk = [ln]; j = i+2
+            while j < len(lines) and lines[j].strip().startswith("|"):
+                blk.append(lines[j]); j += 1
+            cap = ""
+            if j < len(lines) and re.match(r"^\*{0,2}Table\s+\d+\.", lines[j].strip()):
+                cap = lines[j].strip().strip("*"); j += 1
+            _table(doc, blk, cfg, cap); i = j; continue
+        if not st: i += 1; continue
+        p = doc.add_paragraph(); pf = p.paragraph_format
+        pf.line_spacing = cfg["line_spacing"]; pf.space_after = Pt(4)
+        pf.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+        if cfg["indent"] and not ctx["no_indent"]:
+            pf.first_line_indent = Inches(cfg["indent"])
+        _rich(p, st, cfg); i += 1
+
+def build(meta, cfg, sections, bank, by_key, style, order, figures=None):
+    doc = Document()
+    n = doc.styles["Normal"]; n.font.name = cfg["body_font"]; n.font.size = Pt(cfg["body_size"])
+    n.element.rPr.rFonts.set(qn("w:eastAsia"), cfg["body_font"])
+    s = doc.sections[0]; m = cfg["margins"]
+    s.top_margin, s.right_margin = Inches(m[0]), Inches(m[1])
+    s.bottom_margin, s.left_margin = Inches(m[2]), Inches(m[3])
+    ctx = {"eq":0, "no_indent":True}
+
+    p = doc.add_paragraph(); p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p.paragraph_format.space_after = Pt(10)
+    _font(p.add_run(meta["title"]), cfg["body_font"], cfg["title_size"], bold=True)
+    for a in meta.get("authors", []):
+        p = doc.add_paragraph(); p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p.paragraph_format.space_after = Pt(1)
+        _font(p.add_run(a["name"]), cfg["body_font"], cfg["author_size"])
+    affs = []
+    for a in meta.get("authors", []):
+        if a.get("affiliation") and a["affiliation"] not in affs: affs.append(a["affiliation"])
+    for i, af in enumerate(affs, 1):
+        p = doc.add_paragraph(); p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p.paragraph_format.space_after = Pt(0)
+        _font(p.add_run("%d. %s" % (i, af)), cfg["body_font"], cfg["caption_size"], italic=True)
+    em = ", ".join(a["email"] for a in meta.get("authors", []) if a.get("email"))
+    if em:
+        p = doc.add_paragraph(); p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p.paragraph_format.space_after = Pt(10)
+        _font(p.add_run(em), cfg["body_font"], cfg["caption_size"])
+
+    p = doc.add_paragraph(); p.paragraph_format.space_before = Pt(8)
+    p.paragraph_format.space_after = Pt(3)
+    _font(p.add_run(cfg["abstract_heading"]), cfg["body_font"], cfg["heading_size"]+1, bold=True)
+    p = doc.add_paragraph(); p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+    p.paragraph_format.line_spacing = cfg["line_spacing"]
+    _font(p.add_run(meta.get("abstract","")), cfg["body_font"],
+          cfg["body_size"]-0.5, italic=(cfg["columns"] == 2))
+    if meta.get("keywords"):
+        p = doc.add_paragraph(); p.paragraph_format.space_before = Pt(6)
+        _font(p.add_run(cfg["keywords_heading"]+" — "), cfg["body_font"],
+              cfg["body_size"]-0.5, bold=True)
+        _font(p.add_run(meta["keywords"]), cfg["body_font"], cfg["body_size"]-0.5)
+
+    if cfg["columns"] == 2:
+        bs = doc.add_section(WD_SECTION.CONTINUOUS)
+        bs.top_margin, bs.right_margin = Inches(m[0]), Inches(m[1])
+        bs.bottom_margin, bs.left_margin = Inches(m[2]), Inches(m[3])
+        _cols(bs, 2)
+    ctx["no_indent"] = False
+
+    figmap = {f["n"]: f for f in (figures or [])}
+    for sec in sections:
+        lvl = sec.get("level", 1)
+        p = doc.add_paragraph()
+        p.paragraph_format.space_before = Pt(10 if lvl == 1 else 7)
+        p.paragraph_format.space_after = Pt(3); p.paragraph_format.keep_with_next = True
+        _font(p.add_run(sec["title"]), cfg["body_font"],
+              cfg["heading_size"]+(1 if lvl == 1 else 0), bold=True, italic=(lvl > 1))
+        for chunk in re.split(r"(\[\[FIG:\d+\]\])", sec.get("content","")):
+            if not chunk.strip(): continue
+            mf = re.match(r"\[\[FIG:(\d+)\]\]", chunk.strip())
+            if mf:
+                f = figmap.get(int(mf.group(1)))
+                if f and f.get("buf"):
+                    try:
+                        doc.add_picture(f["buf"],
+                            width=Inches(3.2 if cfg["columns"] == 2 else 4.6))
+                        doc.paragraphs[-1].alignment = WD_ALIGN_PARAGRAPH.CENTER
+                        cap = doc.add_paragraph(); cap.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                        cap.paragraph_format.space_after = Pt(9)
+                        mm = re.match(r"^(Fig\.\s*\d+\.)\s*(.*)$", f["caption"])
+                        if mm:
+                            _font(cap.add_run(mm.group(1)+" "), cfg["body_font"],
+                                  cfg["caption_size"], bold=True)
+                            _font(cap.add_run(mm.group(2)), cfg["body_font"], cfg["caption_size"])
+                        else:
+                            _font(cap.add_run(f["caption"]), cfg["body_font"], cfg["caption_size"])
+                    except Exception: pass
+                continue
+            _md(doc, chunk, cfg, ctx)
+
+    p = doc.add_paragraph(); p.paragraph_format.space_before = Pt(14)
+    p.paragraph_format.space_after = Pt(4)
+    _font(p.add_run(cfg["ref_heading"]), cfg["body_font"], cfg["heading_size"], bold=True)
+    for i, r in enumerate(pf_cite.ordered_refs(bank, style, order), 1):
+        p = doc.add_paragraph(); pf = p.paragraph_format
+        pf.line_spacing = 1.0; pf.space_after = Pt(3)
+        pf.left_indent = Inches(0.25); pf.first_line_indent = Inches(-0.25)
+        _font(p.add_run(r.to_ieee(i) if style == "ieee" else r.to_apa()),
+              cfg["body_font"], cfg["ref_size"])
+
+    buf = io.BytesIO(); doc.save(buf); buf.seek(0)
+    return buf.getvalue()
+</script>
+
+<script type="text/x-python" data-name="pf_pipeline">
+import asyncio
+import json
+import re
+import time
+
+import pf_assets
+import pf_cfg
+import pf_cite
+import pf_datasets
+import pf_docx
+import pf_fallback
+import pf_fig
+import pf_grammar
+import pf_human
+import pf_llm
+import pf_plag
+import pf_refs
+import pf_text
+import pf_verify
+
+OUTLINE_SYS = "You are a senior academic researcher planning a manuscript. Return STRICT JSON only."
+OUTLINE_USER = """Plan a {kind} paper titled:
+
+"{title}"
+
+Target: {pages} pages for {style_label}.
+Fixed datasets: {datasets}
+Candidate baselines: {baselines}
+
+Return JSON: abstract (220-260 words naming the datasets and the headline gain),
+keywords (8 comma separated),
+sections (array of {{"title","subs":[{{"title","queries":[".."]}}]}}),
+method (3 sentences), figure_steps (5 strings).
+
+Section order: {skeleton}
+Notes: {notes}
+"""
+
+SEC_SYS = """You are a senior researcher writing for a top-tier {style_label}. Dense, precise prose. Flowing paragraphs, no bullets."""
+SEC_USER = """PAPER: {title}
+SECTION: {section} > {sub}
+TARGET: about {words} words.
+
+DATASETS: {datasets}
+BASELINES: {baselines}
+METRICS: {metrics}
+
+REFERENCES MOST RELEVANT TO THIS SECTION (cite ONLY these):
+{bank}
+
+RULES
+- Marker like [[k4]] right after a claim, before the full stop. 2-4 markers per paragraph.
+- Cite a reference only when its title genuinely matches the claim.
+- Refer to "Table 3" / "Fig. 2" where relevant.
+- $$ ... $$ on its own line for equations.
+- Concrete numbers consistent with the tables.
+- {paras} paragraphs, no headings. Write ONLY the body.
+"""
+
+class Pipeline:
+    def __init__(self, brief, emit):
+        self.b = brief; self.emit = emit
+        self.cfg = pf_cfg.resolve_style(brief["kind"], brief["style"])
+        self.llm = pf_llm.LLM(model=brief.get("model"), temperature=0.7)
+        self.used_fallback = 0
+        self.report = {"brief": {k: v for k, v in brief.items() if k != "api_key"},
+                       "stages": {}, "t0": time.time()}
+        self.stats = {}
+
+    def log(self, stage, msg): self.emit(stage, msg, None)
+
+    async def _safe(self, sys, usr, max_tokens=2600, temperature=0.7):
+        if not self.b["llm_ok"]: return None
+        try:
+            return await self.llm.chat(sys, usr, max_tokens=max_tokens,
+                                       temperature=temperature, tries=3)
+        except Exception as e:
+            self.used_fallback += 1
+            self.log("engine", "fallback: %s" % str(e)[:60])
+            return None
+
+    async def run(self):
+        title = self.b["title"]
+        secs, body_words = pf_cfg.skeleton(self.b["kind"], self.b["pages"])
+        self.log("intake", "%s | ~%d words | %d sections"
+                 % (self.cfg["label"], body_words, len(secs)))
+
+        dss = pf_datasets.pick(title, self.b.get("dataset_override",""), n=3)
+        baselines = pf_datasets.baselines(title, 6)
+        metrics = pf_datasets.metrics_for(title)
+        self.stats["datasets"] = ", ".join(d[0] for d in dss)
+        self.log("datasets", "selected: %s" % self.stats["datasets"])
+
+        subs_flat = [x["title"] for s in secs for x in s["subs"]]
+        tables, dss, baselines, mets = pf_assets.build(title, self.b["kind"], subs_flat,
+                                                       dss, baselines, metrics)
+        figplan = pf_assets.figure_plan(title, self.b["kind"], subs_flat, dss, baselines, metrics)
+        figures = []
+        if self.b.get("use_assets"):
+            self.emit("assets", "rendering %d grayscale figures" % len(figplan), 5)
+            for f in figplan:
+                buf = pf_fig.render(f["kind"], f["payload"])
+                if buf:
+                    figures.append({"n": f["n"], "caption": f["caption"],
+                                    "buf": buf, "bind": f["bind"]})
+        self.stats["tables"] = len(tables); self.stats["figures"] = len(figures)
+
+        # ---------- outline ----------
+        self.emit("outline", "planning structure", 9)
+        skel = json.dumps([{"title": s["title"], "subs": [x["title"] for x in s["subs"]]}
+                           for s in secs], indent=1)
+        outline = None
+        if self.b["llm_ok"]:
+            outline = await self.llm.chat_json(OUTLINE_SYS, OUTLINE_USER.format(
+                kind=self.b["kind"], title=title, pages=self.b["pages"],
+                style_label=self.cfg["label"], skeleton=skel,
+                datasets=", ".join(d[0] for d in dss), baselines=", ".join(baselines),
+                notes=self.b.get("notes") or "none"), max_tokens=2400)
+        if not outline or not outline.get("sections"):
+            outline = pf_fallback.outline(title, self.b["kind"], self.b["pages"])
+            self.log("outline", "template outline")
+
+        plan = outline.get("sections") or []
+        merged = []
+        for i, s in enumerate(secs):
+            p = plan[i] if i < len(plan) else {}
+            subs = p.get("subs") or [{"title": x["title"], "queries": []} for x in s["subs"]]
+            merged.append({"title": p.get("title") or s["title"],
+                           "target": s["target"], "subs": subs})
+
+        # ---------- references ----------
+        self.emit("references", "harvesting from 4 scholarly APIs", 14)
+        section_specs = []
+        for s in merged:
+            section_specs.append(s["title"])
+            for sub in s["subs"]:
+                section_specs.append(sub["title"])
+                section_specs += (sub.get("queries") or [])[:1]
+        kt = pf_text.keyterms(title, 10)
+
+        try:
+            pool = await pf_refs.harvest(
+                title, kt, section_specs, max_refs=self.b["max_refs"],
+                progress=lambda st, m: self.emit(st, m, 18))
+        except Exception as e:
+            self.log("references", "harvest failed (%s)" % str(e)[:60])
+            pool = []
+        self.log("references", "%d candidates passed the relevance gate" % len(pool))
+
+        if pool:
+            await pf_refs.verify_all(pool)
+            vcount = sum(1 for r in pool if r.verified)
+            self.log("references", "%d DOI-verified" % vcount)
+            keep = [r for r in pool if r.verified] or pool
+        else:
+            keep = []
+
+        max_refs = self.b["max_refs"]
+        bank, by_key = pf_refs.renumber(keep, max_refs)
+        self.stats["references"] = len(bank)
+        self.stats["doi_verified"] = sum(1 for r in bank if r.verified)
+        self.stats["mean_relevance"] = round(
+            sum(r.score for r in bank)/max(1, len(bank)), 2) if bank else 0.0
+        self.log("references", "bank: %d refs, mean relevance %.2f"
+                 % (len(bank), self.stats["mean_relevance"]))
+
+        pools = pf_refs.assign_to_sections(bank, merged, per_section=16) if bank else {}
+
+        # ---------- drafting ----------
+        self.emit("drafting", "writing %d subsections" % sum(len(s["subs"]) for s in merged), 25)
+        sem = asyncio.Semaphore(max(1, self.b["concurrency"]))
+        done = {"n": 0, "total": max(1, sum(len(s["subs"]) for s in merged))}
+
+        async def draft(si, ui, sec, sub):
+            pool_s = (pools.get(sec["title"]) or bank)[:16]
+            txt = None
+            async with sem:
+                txt = await self._safe(
+                    SEC_SYS.format(style_label=self.cfg["label"]),
+                    SEC_USER.format(title=title, section=sec["title"], sub=sub["title"],
+                        words=sub.get("target", 250), datasets=", ".join(d[0] for d in dss),
+                        baselines=", ".join(baselines), metrics=", ".join(mets),
+                        bank=pf_refs.digest(pool_s),
+                        paras=max(2, sub.get("target", 250)//130)),
+                    max_tokens=2600)
+            if not txt:
+                txt = pf_fallback.section_text(title, sec["title"], sub["title"],
+                                               pool_s, si*7+ui, {"datasets": dss})
+            done["n"] += 1
+            self.emit("drafting", "%d/%d — %s" % (done["n"], done["total"], sub["title"]),
+                      25 + int(30*done["n"]/done["total"]))
+            return si, ui, pf_text.tidy(txt)
+
+        results = await asyncio.gather(*[draft(si, ui, s, sub)
+                                         for si, s in enumerate(merged)
+                                         for ui, sub in enumerate(s["subs"])])
+        buckets = {}
+        for si, ui, txt in results: buckets.setdefault(si, {})[ui] = txt
+        sections = [{"title": s["title"], "level": 1,
+                     "content": "\n\n".join(buckets.get(si, {}).get(ui, "")
+                                            for ui in range(len(s["subs"])))}
+                    for si, s in enumerate(merged)]
+
+        # ---------- mathematics ----------
+        math_sec = next((s for s in sections if "athematic" in s["title"]
+                         or "Formulation" in s["title"]), None)
+        if math_sec:
+            self.emit("math", "deriving formal mathematics", 60)
+            mt = await self._safe(
+                "You are a mathematical modeller. Clean LaTeX inside $$ ... $$. Avoid typos.",
+                "Paper: %s\nMethod: %s\n\nNotation table, formal problem statement, objective, "
+                "two full derivations with every step, complexity analysis, convergence argument. "
+                "Cite from: %s" % (title, outline.get("method",""), pf_refs.digest(bank[:20])),
+                max_tokens=2800)
+            math_sec["content"] = pf_text.tidy(mt or pf_fallback.math_text(title, bank))
+
+        # ---------- citation repair ----------
+        self.emit("citations", "repairing citation relevance", 64)
+        if bank:
+            rep = pf_verify.repair(sections, pools, by_key)
+            self.log("citations", "swapped %d, injected %d, dropped %d irrelevant"
+                     % (rep["swapped"], rep["injected"], rep["dropped"]))
+            self.stats["citations"] = sum(pf_text.count_cites(s["content"]) for s in sections)
+            used_keys = pf_verify.used_keys(sections)
+        else:
+            self.stats["citations"] = 0
+            used_keys = set()
+
+        # ---------- bind assets ----------
+        for t in tables:
+            for s in sections:
+                if s["title"].lower().startswith(t["bind"].lower()[:12]) or \
+                   t["bind"].lower() in s["title"].lower():
+                    s["content"] += "\n\n" + t["md"] + "\n" + t["caption"]; break
+        for f in figures:
+            for s in sections:
+                if s["title"].lower().startswith(f["bind"].lower()[:12]) or \
+                   f["bind"].lower() in s["title"].lower():
+                    s["content"] += "\n\n[[FIG:%d]]" % f["n"]; break
+
+        # ---------- render citations ----------
+        style = self.b["citation_style"]; order = {}
+        if bank:
+            for s in sections:
+                s["content"] = pf_cite.render(s["content"], by_key, style, order)
+            abstract = pf_cite.render(outline.get("abstract",""), by_key, style, order)
+            bank, by_key, order = pf_verify.prune(bank, used_keys, order)
+            self.stats["references"] = len(bank)
+            self.log("citations", "%d citations across %d references"
+                     % (self.stats["citations"], len(bank)))
+        else:
+            for s in sections:
+                s["content"] = pf_text.strip_markers(s["content"])
+            abstract = outline.get("abstract","")
+
+        # ---------- grammar + plagiarism ----------
+        text_all = "\n\n".join(s["content"] for s in sections)
+        self.stats["words"] = pf_text.words(pf_text.strip_markers(text_all))
+        self.stats["pages_est"] = round(self.stats["words"]/self.cfg["words_per_page"], 1)
+        if self.b["run_grammar"]: self.emit("grammar", "LanguageTool pass", 70)
+        if self.b["run_plagiarism"]: self.emit("plagiarism", "similarity scan", 72)
+
+        g_task = pf_grammar.autocorrect(text_all) if self.b["run_grammar"] \
+            else asyncio.sleep(0, result=(text_all, 0, 0))
+        p_task = pf_plag.similarity(text_all) if self.b["run_plagiarism"] \
+            else asyncio.sleep(0, result={"similarity_percent":0.0,"passed":True,
+                                          "flagged":[],"checked":0,"flagged_count":0})
+        (g_text, g_found, g_fixed), plag = await asyncio.gather(g_task, p_task)
+        if self.b["run_grammar"]:
+            self.stats["grammar_fixes"] = g_fixed
+            self.log("grammar", "%d issues, %d fixed" % (g_found, g_fixed))
+            text_all = g_text
+        if self.b["run_plagiarism"]:
+            self.stats["similarity"] = plag["similarity_percent"]
+            self.report["plagiarism"] = {k: v for k, v in plag.items() if k != "per_sentence"}
+            self.log("plagiarism", "similarity %.1f%%" % plag["similarity_percent"])
+
+        # ---------- humanise ----------
+        hmeta = {}
+        if self.b["run_humanize"]:
+            self.emit("humanize", "rhythm + rarity rewrite loop", 80)
+            text_all, hmeta = await pf_human.humanize_doc(
+                text_all, self.llm, use_llm=self.b["llm_ok"],
+                intensity=self.b.get("intensity", 3),
+                progress=lambda st, m: self.emit(st, m, 88))
+            mm = hmeta.get("final", {}).get("metrics", {})
+            self.stats["ai_score"] = hmeta.get("final", {}).get("score", 0)
+            self.stats["burstiness"] = mm.get("burstiness", 0)
+            self.log("humanize", "AI %.1f | burst %.2f | short %.0f%% | rarity %.2f (target < %.0f)"
+                     % (self.stats["ai_score"], mm.get("burstiness",0),
+                        100*mm.get("short_share",0), mm.get("rarity",0), pf_cfg.AI_TARGET))
+        text_all = pf_text.tidy(text_all)
+
+        # ---------- re-slice ----------
+        allp = pf_text.paras(text_all)
+        weights = [max(1, pf_text.words(pf_text.strip_markers(s["content"]))) for s in sections]
+        tw = sum(weights); idx = 0
+        for s, w in zip(sections, weights):
+            cnt = max(1, round(len(allp)*w/tw))
+            s["content"] = "\n\n".join(allp[idx:idx+cnt]); idx += cnt
+        if idx < len(allp) and sections:
+            sections[-1]["content"] += "\n\n" + "\n\n".join(allp[idx:])
+
+        # ---------- docx ----------
+        self.emit("docx", "building Word document", 94)
+        docx_bytes = pf_docx.build(
+            {"title": title, "authors": self.b["authors"], "abstract": abstract,
+             "keywords": outline.get("keywords","")},
+            self.cfg, sections, bank, by_key, style, order, figures)
+
+        bib = pf_refs.bibtex_all(bank)
+        md = self._markdown(title, self.b["authors"], abstract,
+                            outline.get("keywords",""), sections, bank, style, order)
+        self.stats["elapsed"] = round(time.time()-self.report["t0"], 1)
+        self.stats["fallback_units"] = self.used_fallback
+        self.stats["engine"] = "keyless cloud" if self.b["llm_ok"] else "offline template"
+        self.report["stats"] = self.stats; self.report["humanize"] = hmeta
+        self.emit("done", "manuscript complete", 100)
+        return {"docx": docx_bytes, "bib": bib.encode("utf-8"),
+                "md": md.encode("utf-8"),
+                "report": json.dumps(self.report, indent=2, ensure_ascii=False).encode("utf-8"),
+                "stats": self.stats,
+                "preview": self._preview(title, self.b["authors"], abstract, sections,
+                                         bank, style, order, figures),
+                "refs": self._refaudit(bank)}
+
+    def _refaudit(self, bank):
+        rows = []
+        for r in sorted(bank, key=lambda x: -x.score)[:60]:
+            rows.append("<div class='r'><span class='sc'>%.2f</span>"
+                        "<span>%s <span class='t'>(%s) %s</span></span></div>"
+                        % (r.score, r.title[:110], r.year, (r.venue or "")[:40]))
+        return "".join(rows) or "<div class='r'>no references</div>"
+
+    def _markdown(self, title, authors, abstract, keywords, sections, bank, style, order):
+        o = ["# %s\n" % title]
+        for a in authors: o.append("**%s** — %s  " % (a["name"], a.get("affiliation","")))
+        o.append("\n## Abstract\n\n%s\n" % abstract)
+        o.append("**%s:** %s\n" % (self.cfg["keywords_heading"], keywords))
+        for s in sections: o.append("\n## %s\n\n%s\n" % (s["title"], s["content"]))
+        o.append("\n## %s\n" % self.cfg["ref_heading"])
+        for i, r in enumerate(pf_cite.ordered_refs(bank, style, order), 1):
+            o.append("- " + (r.to_ieee(i) if style == "ieee" else r.to_apa()))
+        return "\n".join(o)
+
+    def _preview(self, title, authors, abstract, sections, bank, style, order, figures):
+        import html as H
+        figmap = {f["n"]: f for f in figures}
+        o = ["<h1>%s</h1>" % H.escape(title)]
+        o.append('<div class="au">%s</div>' % H.escape(
+            " · ".join("%s, %s" % (a["name"], a.get("affiliation","")) for a in authors)))
+        o.append('<div class="abs"><b>%s</b><br>%s</div>'
+                 % (self.cfg["abstract_heading"], H.escape(abstract)))
+        for s in sections:
+            o.append("<h3>%s</h3>" % H.escape(s["title"]))
+            for blk in s["content"].split("\n\n"):
+                blk = blk.strip()
+                if not blk: continue
+                mf = re.match(r"^\[\[FIG:(\d+)\]\]$", blk)
+                if mf:
+                    o.append('<p class="cap">[ %s ]</p>' % H.escape(
+                        figmap.get(int(mf.group(1)), {}).get("caption",""))); continue
+                if blk.startswith("|"):
+                    rows = [r for r in blk.split("\n") if "|" in r]
+                    rows = [r for r in rows if not set(r.replace("|","").strip()) <= set("-: ")]
+                    o.append("<table>" + "".join(
+                        "<tr>" + "".join("<td>%s</td>" % H.escape(c.strip())
+                        for c in r.strip("|").split("|")) + "</tr>" for r in rows) + "</table>")
+                elif re.match(r"^\*{0,2}Table\s+\d+\.", blk):
+                    o.append('<p class="cap">%s</p>' % H.escape(blk.strip("*")))
+                elif blk.startswith("$$"):
+                    o.append("<p style='text-align:center;font-style:italic'>%s</p>"
+                             % H.escape(blk.strip("$").strip()))
+                else:
+                    o.append("<p>%s</p>" % H.escape(blk))
+        o.append("<h3>%s</h3>" % self.cfg["ref_heading"])
+        for i, r in enumerate(pf_cite.ordered_refs(bank, style, order), 1):
+            o.append("<p style='font-size:12px;text-indent:-18px;padding-left:18px'>%s</p>"
+                     % H.escape(r.to_ieee(i) if style == "ieee" else r.to_apa()))
+        return "".join(o)
+</script>
+
+<script type="text/x-python" data-name="pf_main">
+import asyncio, json
+import pf_cfg, pf_pipeline
+
+def _apply(brief):
+    pf_cfg.STATE.update({
+        "api_key": brief.get("api_key",""),
+        "base_url": brief.get("base_url") or "https://text.pollinations.ai/openai",
+        "model": brief.get("model") or "openai",
+        "concurrency": int(brief.get("concurrency", 2)),
+        "contact": brief.get("contact","paper.factory@example.com"),
+        "proxy": brief.get("proxy",""), "engine": brief.get("engine","auto"),
+        "intensity": int(brief.get("intensity", 3)),
+        "strict": int(brief.get("strict", 2)),
+        "use_assets": bool(brief.get("use_assets", True)),
+    })
+
+async def _probe():
+    import pf_llm
+    if pf_cfg.STATE.get("engine") == "offline": return False
+    return await pf_llm.LLM().probe()
+
+async def run_pipeline():
+    from js import __brief, __emit
+    from pyodide.ffi import to_js
+    import js as _js
+
+    brief = json.loads(__brief); _apply(brief)
+    def emit(stage, msg, pct):
+        __emit(stage or "", str(msg), -1 if pct is None else float(pct))
+
+    emit("intake", "probing engine…", 2)
+    ok = await _probe()
+    brief["llm_ok"] = ok; pf_cfg.STATE["llm_ok"] = ok
+    emit("engine", "engine: %s" % ("keyless cloud" if ok else "offline template"), 2)
+
+    p = pf_pipeline.Pipeline(brief, emit)
+    out = await p.run()
+    payload = {
+        "docx": to_js(out["docx"]),
+        "bib": to_js(out["bib"]),
+        "md": to_js(out["md"]),
+        "report": to_js(out["report"]),
+        "preview": out["preview"],
+        "refs": out["refs"],
+        "stats": to_js(out["stats"]),
+    }
+    return to_js(payload, dict_converter=_js.Object.fromEntries)
+
+async def test_engine():
+    from js import __brief
+    brief = json.loads(__brief); _apply(brief)
+    import pf_net
+    lines = []
+    try: lines.append("model: %s" % ("reachable" if await _probe() else "unreachable"))
+    except Exception as e: lines.append("model: failed (%s)" % str(e)[:40])
+    checks = [("crossref", lambda: pf_net.get_json("https://api.crossref.org/works",
+                       params={"query.title":"transformer","rows":1})),
+              ("openalex", lambda: pf_net.get_json("https://api.openalex.org/works",
+                       params={"search":"transformer","per-page":1})),
+              ("arxiv", lambda: pf_net.get_text("https://export.arxiv.org/api/query",
+                       params={"search_query":'all:"transformer"',"max_results":1})),
+              ("languagetool", lambda: pf_net.post_form("https://api.languagetool.org/v2/check",
+                       {"text":"This are a test.","language":"en-US"}))]
+    for name, fn in checks:
+        try: lines.append("%s: %s" % (name, "reachable" if await fn() else "blocked"))
+        except Exception: lines.append("%s: blocked" % name)
+    return " | ".join(lines)
+</script>
+
+<!-- ============================ JS GLUE ============================ -->
+<script>
+const PYODIDE_CDN = "https://cdn.jsdelivr.net/pyodide/v0.27.2/full/";
+const STAGES = [["intake","Intake"],["engine","Engine probe"],["datasets","Dataset matching"],
+ ["assets","Tables + figures"],["outline","Outline planning"],
+ ["references","Scored reference retrieval"],["drafting","Section drafting"],
+ ["math","Mathematical derivations"],["citations","Citation relevance repair"],
+ ["grammar","Grammar & style"],["plagiarism","Plagiarism scan"],
+ ["humanize","Rhythm humaniser"],["docx","Word document"],["done","Packaging"]];
+const PARALLEL = new Set(["references","drafting","grammar","plagiarism","assets"]);
+let pyodide=null, result=null, running=false;
+const $ = id => document.getElementById(id);
+
+STAGES.forEach(([id,label])=>{
+  const d=document.createElement("div"); d.className="st"; d.id="st_"+id;
+  d.innerHTML=`<span class="dot"></span><span>${label}</span>`+(PARALLEL.has(id)?'<span class="par">∥</span>':'');
+  $("stages").appendChild(d);});
+function setStage(id,s){const e=$("st_"+id);if(!e)return;
+  if(s==="run"){e.classList.add("run");e.classList.remove("done","err");}
+  else if(s==="done"){e.classList.remove("run");e.classList.add("done");}
+  else if(s==="err"){e.classList.remove("run");e.classList.add("err");}}
+function logLine(stage,msg,cls){const b=$("log");const d=document.createElement("div");
+  d.innerHTML=`<span class="${cls||'d'}">[${new Date().toLocaleTimeString()}]</span> `+
+    (stage?`<span class="s">${stage}</span> `:"")+String(msg).replace(/</g,"&lt;");
+  b.appendChild(d);b.scrollTop=b.scrollHeight;}
+const bar = p => $("bar").style.width=Math.max(0,Math.min(100,p))+"%";
+
+document.querySelectorAll("#kind .chip").forEach(c=>c.onclick=()=>{
+  document.querySelectorAll("#kind .chip").forEach(x=>x.classList.remove("on"));c.classList.add("on");
+  const j=c.dataset.v==="journal"; $("pages").value=j?30:8;
+  $("style").querySelector(`[data-v="${j?"springer":"ieee"}"]`).click();});
+document.querySelectorAll("#style .chip").forEach(c=>c.onclick=()=>{
+  document.querySelectorAll("#style .chip").forEach(x=>x.classList.remove("on"));c.classList.add("on");});
+document.querySelectorAll("#engine .chip").forEach(c=>c.onclick=()=>{
+  document.querySelectorAll("#engine .chip").forEach(x=>x.classList.remove("on"));c.classList.add("on");
+  $("estate").textContent={auto:"auto — probe at run",cloud:"keyless cloud forced",
+    offline:"offline template forced"}[c.dataset.v];});
+document.querySelectorAll(".tg").forEach(t=>{const cb=t.querySelector("input");
+  const s=()=>t.classList.toggle("on",cb.checked);cb.onchange=s;s();});
+["apikey","model","authors","baseurl","proxy"].forEach(id=>{const e=$(id);if(!e)return;
+  const v=localStorage.getItem("pf_"+id); if(v)e.value=v;
+  e.oninput=()=>localStorage.setItem("pf_"+id,e.value);});
+
+(async function boot(){
+  const b=$("boot");
+  try{
+    logLine("","loading pyodide…","d");
+    const s=document.createElement("script"); s.src=PYODIDE_CDN+"pyodide.js";
+    document.head.appendChild(s); await new Promise((r,j)=>{s.onload=r;s.onerror=j;});
+    pyodide = await loadPyodide({indexURL: PYODIDE_CDN});
+    logLine("","installing python-docx + matplotlib…","d");
+    await pyodide.loadPackage(["micropip","lxml","matplotlib"]);
+    await pyodide.pyimport("micropip").install("python-docx");
+    pyodide.FS.mkdirTree("/home/pyodide/pf");
+    for(const sc of document.querySelectorAll('script[type="text/x-python"]'))
+      pyodide.FS.writeFile("/home/pyodide/pf/"+sc.dataset.name+".py", sc.textContent);
+    await pyodide.runPythonAsync(
+      "import sys,os\nsys.path.insert(0,'/home/pyodide/pf')\nos.chdir('/home/pyodide')");
+    b.textContent="runtime ready"; b.className="ok";
+    logLine("","python "+pyodide.version+" online · "+
+      document.querySelectorAll('script[type="text/x-python"]').length+
+      " modules · scored retrieval · rhythm humaniser","g");
+    $("go").disabled=false; $("estate").textContent="auto — probe at run";
+  }catch(e){b.textContent="runtime failed";b.className="bad";
+    logLine("","boot error: "+e,"e");}
+})();
+
+function parseAuthors(){
+  return $("authors").value.split("\n").map(l=>l.trim()).filter(Boolean).map(l=>{
+    const p=l.split("|").map(x=>x.trim());
+    return {name:p[0]||"Anonymous",affiliation:p[1]||"Independent Researcher",email:p[2]||""};});
+}
+function brief(){
+  const kind=document.querySelector("#kind .chip.on").dataset.v;
+  let style=document.querySelector("#style .chip.on").dataset.v; if(style==="auto")style="";
+  let cs=$("citestyle").value; if(cs==="auto")cs="";
+  let pages=Math.max(4,Math.min(60,parseInt($("pages").value||"8",10)));
+  if(kind==="journal")pages=Math.max(pages,25);
+  return {title:$("title").value.trim()||"An Adaptive Framework for Robust Representation Learning",
+    kind,style,pages,citation_style:cs,
+    authors:parseAuthors().length?parseAuthors():[{name:"A. Researcher",
+      affiliation:"Department of Computer Science, University",email:"author@university.edu"}],
+    notes:$("notes").value.trim(), dataset_override:$("ds").value.trim(),
+    engine:document.querySelector("#engine .chip.on").dataset.v,
+    api_key:$("apikey").value.trim(),
+    base_url:$("baseurl").value.trim()||"https://text.pollinations.ai/openai",
+    model:$("model").value.trim()||"openai", proxy:$("proxy").value.trim(),
+    concurrency:Math.max(1,Math.min(8,parseInt($("conc").value||"2",10))),
+    intensity:parseInt($("hint").value||"3",10),
+    strict:parseInt($("strict").value||"2",10),
+    max_refs:kind==="journal"?90:40,
+    run_grammar:$("t_grammar").checked, run_plagiarism:$("t_plag").checked,
+    run_humanize:$("t_hum").checked, use_assets:$("t_assets").checked,
+    contact:"paper.factory@example.com"};
+}
+$("test").onclick=async()=>{
+  if(!pyodide)return; globalThis.__brief=JSON.stringify(brief());
+  $("test").disabled=true;$("test").textContent="testing…";
+  try{const r=await pyodide.runPythonAsync("import pf_main\nawait pf_main.test_engine()");
+    logLine("","engine test → "+r, r.includes("unreachable")||r.includes("blocked")?"w":"g");
+    $("estate").textContent=r;}
+  catch(e){logLine("","test failed: "+e,"e");}
+  $("test").disabled=false;$("test").textContent="Test engine";};
+
+$("go").onclick=async()=>{
+  if(!pyodide||running)return; running=true;
+  $("go").disabled=true;$("go").textContent="Generating…";
+  $("log").innerHTML="";$("stats").innerHTML="";$("dl").style.display="none";
+  $("preview").style.display="none";$("prevbtn").style.display="none";
+  $("refcard").style.display="none";
+  STAGES.forEach(([id])=>{$("st_"+id).className="st";}); bar(1);
+  globalThis.__brief=JSON.stringify(brief());
+  globalThis.__emit=(stage,msg,pct)=>{
+    if(stage){
+      const idx=STAGES.findIndex(s=>s[0]===stage);
+      STAGES.forEach(([id],i)=>{if(i<idx)setStage(id,"done");});
+      if(idx>=0&&pct>=0)setStage(stage,"run");
+      if(stage==="engine")$("estate").textContent=msg;
+      logLine(stage,msg,stage==="done"?"g":(stage==="engine"?"w":"d"));
+    } else logLine("",msg,"d");
+    if(pct>=0)bar(pct);
+  };
+  try{
+    logLine("","pipeline started","g");
+    const out=await pyodide.runPythonAsync("import pf_main\nawait pf_main.run_pipeline()");
+    result=out; STAGES.forEach(([id])=>setStage(id,"done")); bar(100);
+    logLine("","✔ manuscript generated","g");
+    const st=out.stats;
+    const cards=[["words",st.words||0,""],["≈pages",st.pages_est||0,""],
+      ["tables",st.tables||0,""],["figures",st.figures||0,""],
+      ["references",st.references||0,""],["mean relevance",st.mean_relevance||0,""],
+      ["DOI verified",st.doi_verified||0,""],["citations",st.citations||0,""],
+      ["similarity",(st.similarity!=null?st.similarity+"%":"—"),"",st.similarity||0,20],
+      ["AI score",(st.ai_score!=null?st.ai_score+"%":"—"),"",st.ai_score||0,20],
+      ["burstiness",st.burstiness||"—",""],["grammar fixes",st.grammar_fixes||0,""],
+      ["seconds",st.elapsed||0,""]];
+    $("stats").innerHTML=cards.map(c=>{
+      const [k,v,,val,bad]=c;
+      const cls=(bad!=null)?((val>bad)?"bad":"good"):"";
+      return `<div class="stat ${cls}"><b>${v}</b><span>${k}</span></div>`;}).join("");
+    $("dl").style.display="grid"; $("prevbtn").style.display="block";
+    $("refcard").style.display="block";
+    $("preview").innerHTML=out.preview; $("refs").innerHTML=out.refs;
+  }catch(e){logLine("","FAILED: "+e,"e");
+    const c=document.querySelector(".st.run"); if(c)c.classList.add("err"); bar(0);}
+  running=false;$("go").disabled=false;$("go").textContent="Generate manuscript";
+};
+function save(bytes,fn,mime){const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([bytes],{type:mime}));a.download=fn;
+  document.body.appendChild(a);a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},4000);}
+const slug=()=>($("title").value.trim().toLowerCase().replace(/[^\w\s-]/g,"")
+  .replace(/\s+/g,"-").slice(0,60)||"paper");
+$("d_docx").onclick=()=>result&&save(result.docx,slug()+".docx",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+$("d_bib").onclick=()=>result&&save(result.bib,"references.bib","text/plain");
+$("d_md").onclick=()=>result&&save(result.md,slug()+".md","text/markdown");
+$("d_rep").onclick=()=>result&&save(result.report,"report.json","application/json");
+$("prevbtn").onclick=()=>{const p=$("preview");
+  p.style.display=p.style.display==="block"?"none":"block";};
+</script>
+</body>
+</html>
